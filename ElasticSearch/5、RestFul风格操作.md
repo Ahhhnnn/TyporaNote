@@ -203,5 +203,288 @@ GET db1/_search?q=address:成都&q=name:杜    搜索address和 name同时满足
 
 ### 复杂查询
 
+根据字段值进行匹配 返回指定的字段
 
+match 不支持多字段查询
+
+```
+GET db1/_search
+{
+  "query" :{
+    "match": {
+      "name": "何宁2"
+    }
+  }
+  , "_source": ["name","age"]
+}
+```
+
+![image-20200802161804953](assets/image-20200802161804953.png)
+
+排序和分页查询(注意 text类型不支持排序)
+
+```
+GET db1/_search
+{
+  "query" :{
+    "match": {
+      "name": "何宁2"
+    }
+  }
+  ,"sort": [
+    {
+      "age": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+GET db1/_search
+{
+  "query" :{
+    "match": {
+      "name": "何宁2"
+    }
+  }
+  , 
+  "from": 0,
+  "size": 2
+}
+```
+
+![image-20200802162410715](assets/image-20200802162410715.png)
+
+多字段查询（bool）  and条件，同时满足才能查出来
+
+```
+GET db1/_search
+{
+  "query" :{
+    "bool": {
+     "must": [
+        {
+          "match": {
+          "name": "何宁2"
+        }
+       },
+       {
+          "match": {
+          "age": "22"
+        }
+       }
+     ]
+    }
+  }
+}
+```
+
+![image-20200802163128948](assets/image-20200802163128948.png)
+
+or条件，满足一个就可以查出来
+
+```
+GET db1/_search
+{
+  "query" :{
+    "bool": {
+     "should": [
+        {
+          "match": {
+          "name": "何宁2"
+        }
+       },
+       {
+          "match": {
+          "age": "3"
+        }
+       }
+     ]
+    }
+  }
+}
+```
+
+![image-20200802163210508](assets/image-20200802163210508.png)
+
+must_not 必须不满足某条件 才查询出来
+
+```
+GET db1/_search
+{
+  "query" :{
+    "bool": {
+     "must_not": [
+        {
+          "match": {
+          "name": "何宁2"
+        }
+       },
+       {
+          "match": {
+          "age": "3"
+        }
+       }
+     ]
+    }
+  }
+}
+```
+
+![image-20200802163450875](assets/image-20200802163450875.png)
+
+filter 条件查询 附加过滤条件
+
+```
+GET db1/_search
+{
+  "query" :{
+    "bool": {
+     "must_not": [
+       {
+          "match": {
+          "age": "3"
+        }
+       }
+     ],
+     "filter": [
+       {
+         "range": { 
+           "age": { // 年龄 >= 10 <=30
+             "gte": 10,
+             "lte": 30
+           }
+         }
+       }
+     ]
+    }
+  }
+}
+```
+
+![image-20200802163603948](assets/image-20200802163603948.png)
+
+多条件查询
+
+match：会进行分词查询，根据查询出来的文档，分析文档后，进行查询
+
+term：直接精确查询
+
+两种类型的数据 text  和 keyword
+
+text：会被分词器解析，分成多个词
+
+比如录入一个 name  和 desc  name是车text会被分词器解析，desc是keyword不会被分词器解析
+
+所以name被解析后存在索引中为['汽','车','保','养']
+
+而desc 不会被解析 存在索引中为['汽车保养']
+
+```
+PUT /testdb/_doc/3
+{
+  "name":"汽车保养",
+  "desc":"汽车保养"
+}
+```
+
+![image-20200802205654793](assets/image-20200802205654793.png)
+
+![image-20200802205731664](assets/image-20200802205731664.png)
+
+keyword：不会被分词器解析
+
+```
+PUT /testdb
+{
+  "mappings": {
+    "properties": {
+      "name":{
+        "type": "text"
+      },
+      "desc":{
+        "type": "keyword"
+      }
+    }
+  }  
+}
+
+PUT /testdb/_doc/1
+{
+  "name":"何宁",
+  "desc":"何宁是一个帅哥"
+}
+
+PUT /testdb/_doc/2
+{
+  "name":"何宁2",
+  "desc":"何宁2是一个帅哥"
+}
+
+PUT /testdb/_doc/2
+{
+  "name":"李志鹏",
+  "desc":"李志鹏是一个傻逼"
+}
+```
+
+### match 查询
+
+#### match_phrase
+
+完全匹配所有的分词（精确匹配）
+
+比如：有一个字段为 “我的宝马多少马力”，那么分词器会分为 宝马 多少 马力
+
+当使用match 搜索是，包含其中一个词的都会被搜索出来，使用match_phrase时，就会搜索出包含所有分词的结果
+
+```
+{
+  "query": {
+    "match_phrase": {
+        "content" : {
+            "query" : "我的宝马多少马力"
+        }
+    }
+  }
+}
+```
+
+如果使用完全匹配可能比较严格，可以设置调节因子，少匹配一个也是可以的(使用slop字段，执行可以少匹配几个)
+
+```
+{
+  "query": {
+    "match_phrase": {
+        "content" : {
+            "query" : "我的宝马多少马力",
+            "slop" : 1
+        }
+    }
+  }
+}
+```
+
+#### multi_match
+
+多字段匹配查询
+
+如果我们希望两个字段进行匹配，其中一个字段有这个文档就满足的话，使用multi_match
+
+```
+{
+  "query": {
+    "multi_match": {
+        "query" : "我的宝马多少马力",
+        "fields" : ["title", "content"]
+    }
+  }
+}
+```
+
+高亮查询
+
+```
+
+```
 
