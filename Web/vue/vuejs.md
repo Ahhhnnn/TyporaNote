@@ -629,6 +629,14 @@ axios.post(url,{key:value}).then(function(){})
 
 ### axios 与 vue
 
+配置默认访问的前缀
+
+```
+Vue.prototype.$axios = axios    //把axios挂载到vue的原型中，在vue中每个组件都可以使用axios发送请求
+axios.defaults.baseURL = 'http://localhost:8081' 
+axios.defaults.withCredentials=true;
+```
+
 注意事项：
 
 axios中的this上下文对象已经被改变，无法通过this修改data的数据
