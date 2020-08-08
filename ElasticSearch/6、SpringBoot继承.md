@@ -1,4 +1,4 @@
-# SpringBoot继承
+# SpringBoot集成
 
 官方文档：https://www.elastic.co/guide/index.html
 
@@ -73,6 +73,16 @@ try {
         }
 ```
 
+```java
+@Test
+    public void createIndexTest() throws IOException {
+        CreateIndexRequest indexRequest = new CreateIndexRequest(ElasticsearchConstant.INDEX_NAME_TWO);
+        indexRequest.setTimeout(TimeValue.timeValueSeconds(10));
+        CreateIndexResponse createIndexResponse = restHighLevelClient.indices().create(indexRequest, RequestOptions.DEFAULT);
+        log.info(createIndexResponse.remoteAddress().getAddress());
+    }
+```
+
 
 
 
@@ -90,9 +100,70 @@ try {
 
 ### 文档操作
 
+#### 插入数据
+
+IndexRequest.source()可以接受多个参数，可以传入jsonString，map等数据
+
+![image-20200806231122981](assets/image-20200806231122981.png)
+
+```java
+@Test
+    public void insertCar() throws IOException {
+        Car car =Car.builder().age(2).desc("我的第一台车").id(1L).name("宝马").price(new BigDecimal(300000)).build();
+        //JSONString形式插入
+        IndexRequest indexRequest = new IndexRequest().id(String.valueOf(car.getId())).index(ElasticsearchConstant.INDEX_NAME_TWO)
+            .source(JSON.toJSONString(car), XContentType.JSON);
+        IndexResponse indexResponse = restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
+        log.info(indexResponse.getId());
+    }
+
+@Test
+    public void insertCarByMap() throws IOException {
+        Car car =Car.builder().age(2).desc("我的第二台车").id(2L).name("奔驰").price(new BigDecimal(500000)).build();
+        //Map形式形式插入
+        IndexRequest indexRequest = new IndexRequest().id(String.valueOf(car.getId())).index(ElasticsearchConstant.INDEX_NAME_TWO)
+            .source(BeanUtil.beanToMap(car), XContentType.JSON);
+        IndexResponse indexResponse = restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
+        log.info(indexResponse.getId());
+    }
+```
+
+ #### 更新操作
 
 
- 
+
+#### 删除
+
+
+
+#### 查询文档
+
+
+
+```java
+@Test
+    public void search() throws IOException {
+        SearchRequest searchRequest = new SearchRequest(ElasticsearchConstant.INDEX_NAME_TWO);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        // 查询执行字段匹配的文档，会被分词
+        //searchSourceBuilder.query(QueryBuilders.matchQuery("name","奔驰"));
+        //searchSourceBuilder.query(QueryBuilders.matchQuery("name","马车"));
+        searchSourceBuilder.query(QueryBuilders.matchQuery("desc","车"));
+        // 查询所有文档 matchAllQuery
+       //searchSourceBuilder.query(QueryBuilders.matchAllQuery());
+        searchRequest.source(searchSourceBuilder);
+        SearchResponse search = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        SearchHit[] hits = search.getHits().getHits();
+        List<Car> cars = new ArrayList<>();
+        for (SearchHit hit : hits) {
+            Car car = BeanUtil.mapToBean(hit.getSourceAsMap(), Car.class, false);
+            cars.add(car);
+        }
+        log.info(cars.toString());
+    }
+```
+
+
 
 ## Spring Data ElasticSearch
 
