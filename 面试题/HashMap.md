@@ -113,7 +113,7 @@ put方法的处理过程，可拆分为四部分
 - 先是通过key的hash值计算目标bucket的下标
 - 然后遍历对应bucket上的链表，逐个对比，得到结果
 
-```
+```java
 public V get(Object key) {
     if (key == null)
         return getForNullKey();

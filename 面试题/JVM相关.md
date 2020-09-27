@@ -8,9 +8,9 @@ JVM内存结构主要有三大块：***\*堆内存\****、***\*方法区\****和
 
 JVM常用控制参数
 
--Xms设置堆的最小空间大小。
+-Xms设置堆的最小空间大小。 -Xms128M
 
--Xmx设置堆的最大空间大小。
+-Xmx设置堆的最大空间大小。 -Xmx512M
 
 -XX:NewSize设置新生代最小空间大小。
 
@@ -21,6 +21,90 @@ JVM常用控制参数
 -XX:MaxPermSize设置永久代最大空间大小。
 
 -Xss设置每个线程的堆栈大小。
+
+**性能调优参数：**
+
+| 参数及其默认值                | 描述                                  |
+| ----------------------------- | ------------------------------------- |
+| -XX:LargePageSizeInBytes=4m   | 设置用于Java堆的大页面尺寸            |
+| -XX:MaxHeapFreeRatio=70       | GC后java堆中空闲量占的最大比例        |
+| -XX:MaxNewSize=size           | 新生成对象能占用内存的最大值          |
+| -XX:MaxPermSize=64m           | 老生代对象能占用内存的最大值          |
+| -XX:MinHeapFreeRatio=40       | GC后java堆中空闲量占的最小比例        |
+| -XX:NewRatio=2                | 新生代内存容量与老生代内存容量的比例  |
+| -XX:NewSize=2.125m            | 新生代对象生成时占用内存的默认值      |
+| -XX:ReservedCodeCacheSize=32m | 保留代码占用的内存容量                |
+| -XX:ThreadStackSize=512       | 设置线程栈大小，若为0则使用系统默认值 |
+| -XX:+UseLargePages            | 使用大页面内存                        |
+
+
+
+**JVM 行为参数列表**
+
+| 参数及其默认值            | 描述                                                      |
+| ------------------------- | --------------------------------------------------------- |
+| -XX:-DisableExplicitGC    | 禁止调用System.gc()；但jvm的gc仍然有效                    |
+| -XX:+MaxFDLimit           | 最大化文件描述符的数量限制                                |
+| -XX:+ScavengeBeforeFullGC | 新生代GC优先于Full GC执行                                 |
+| -XX:+UseGCOverheadLimit   | 在抛出OOM之前限制jvm耗费在GC上的时间比例                  |
+| -XX:-UseConcMarkSweepGC   | 对老生代采用并发标记交换算法进行GC                        |
+| -XX:-UseParallelGC        | 启用并行GC                                                |
+| -XX:-UseParallelOldGC     | 对Full GC启用并行，当-XX:-UseParallelGC启用时该项自动启用 |
+| -XX:-UseSerialGC          | 启用串行GC                                                |
+| -XX:+UseThreadPriorities  | 启用本地线程优先级                                        |
+
+
+
+常用调试参数列表
+
+| 参数及其默认值                                 | 描述                                                        |
+| ---------------------------------------------- | ----------------------------------------------------------- |
+| -XX:-CITime                                    | 打印消耗在JIT编译的时间                                     |
+| -XX:ErrorFile=./hs_err_pid<pid>.log            | 保存错误日志或者数据到文件中                                |
+| -XX:-ExtendedDTraceProbes                      | 开启solaris特有的dtrace探针                                 |
+| -XX:HeapDumpPath=./java_pid<pid>.hprof         | 指定导出堆信息时的路径或文件名                              |
+| **-XX:-HeapDumpOnOutOfMemoryError**            | **当首次遭遇OOM时导出此时堆中相关信息**                     |
+| -XX:                                           | 出现致命ERROR之后运行自定义命令                             |
+| -XX:OnOutOfMemoryError="<cmd args>;<cmd args>" | 当首次遭遇OOM时执行自定义命令                               |
+| -XX:-PrintClassHistogram                       | 遇到Ctrl-Break后打印类实例的柱状信息，与jmap -histo功能相同 |
+| -XX:-PrintConcurrentLocks                      | 遇到Ctrl-Break后打印并发锁的相关信息，与jstack -l功能相同   |
+| -XX:-PrintCommandLineFlags                     | 打印在命令行中出现过的标记                                  |
+| -XX:-PrintCompilation                          | 当一个方法被编译时打印相关信息                              |
+| -XX:-PrintGC                                   | 每次GC时打印相关信息                                        |
+| -XX:-PrintGC Details                           | 每次GC时打印详细信息                                        |
+| -XX:-PrintGCTimeStamps                         | 打印每次GC的时间戳                                          |
+| -XX:-TraceClassLoading                         | 跟踪类的加载信息                                            |
+| -XX:-TraceClassLoadingPreorder                 | 跟踪被引用到的所有类的加载信息                              |
+| -XX:-TraceClassResolution                      | 跟踪常量池                                                  |
+| -XX:-TraceClassUnloading                       | 跟踪类的卸载信息                                            |
+| -XX:-TraceLoaderConstraints                    | 跟踪类加载器约束的相关信息                                  |
+
+**查看JVM内存信息**
+
+Runtime.getRuntime().maxMemory(); //最大可用内存，对应-Xmx
+
+Runtime.getRuntime().freeMemory(); //当前JVM空闲内存
+
+Runtime.getRuntime().totalMemory(); //当前JVM占用的内存总数，其值相当于当前JVM已使用的内存及freeMemory()的总和
+
+关于maxMemory()，freeMemory()和totalMemory()：
+
+maxMemory()为JVM的最大可用内存，可通过-Xmx设置，默认值为物理内存的1/4，设值不能高于计算机物理内存；
+
+totalMemory()为当前JVM占用的内存总数，其值相当于当前JVM已使用的内存及freeMemory()的总和，会随着JVM使用内存的增加而增加；
+
+freeMemory()为当前JVM空闲内存，因为JVM只有在需要内存时才占用物理内存使用，所以freeMemory()的值一般情况下都很小，而 JVM实际可用内存并不等于freeMemory()，而应该等于maxMemory()-totalMemory()+freeMemory()。及其 设置JVM内存分配
+
+**JVM 启动参数**
+
+java启动参数共分为三类；
+其一是标准参数（-），所有的JVM实现都必须实现这些参数的功能，而且向后兼容；
+其二是非标准参数（-X），默认jvm实现这些参数的功能，但是并不保证所有jvm实现都满足，且不保证向后兼容；
+其三是非Stable参数（-XX），此类参数各个jvm实现会有所不同，将来可能会随时取消，需要慎重使用；
+
+
+
+
 
 示意图
 

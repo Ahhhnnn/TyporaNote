@@ -315,6 +315,28 @@ System.out.println(LocalDate.now().with(temporal -> temporal.plus(ThreadLocalRan
 
 除了计算外，还可以判断日期是否符合某个条件。比如，自定义函数，判断指定日期是否是家庭成员的生日：
 
+```java
+
+public static Boolean isFamilyBirthday(TemporalAccessor date) {
+    int month = date.get(MONTH_OF_YEAR);
+    int day = date.get(DAY_OF_MONTH);
+    if (month == Month.FEBRUARY.getValue() && day == 17)
+        return Boolean.TRUE;
+    if (month == Month.SEPTEMBER.getValue() && day == 21)
+        return Boolean.TRUE;
+    if (month == Month.MAY.getValue() && day == 22)
+        return Boolean.TRUE;
+    return Boolean.FALSE;
+}
+
+
+System.out.println("//查询是否是今天要举办生日");
+// LocalDate.now返回的是LocalDate实现了Temporal接口，Temporal是TemporalAccessor的一个子类
+System.out.println(LocalDate.now().query(CommonMistakesApplication::isFamilyBirthday));
+```
+
+
+
 **使用 Java 8 操作和计算日期时间虽然方便，但计算两个日期差时可能会踩坑：Java 8 中有一个专门的类 Period 定义了日期间隔，通过 Period.between 得到了两个 LocalDate 的差，返回的是两个日期差几年零几月零几天。如果希望得知两个日期之间差几天，直接调用 Period 的 getDays() 方法得到的只是最后的“零几天”，而不是算总的间隔天数**
 
 比如，计算 2019 年 12 月 12 日和 2019 年 10 月 1 日的日期间隔，很明显日期差是 2 个月零 11 天，但获取 getDays 方法得到的结果只是 11 天，而不是 72 天：
@@ -339,3 +361,56 @@ P2M11D
 72
 ```
 
+
+
+**重点回顾**
+
+![image-20200927195048965](assets/image-20200927195048965.png)
+
+这里有个误区是，认为 java.util.Date 类似于新 API 中的 LocalDateTime。其实不是，虽然它们都没有时区概念，但 java.util.Date 类是因为使用 UTC 表示，所以没有时区概念，其本质是时间戳；而 LocalDateTime，严格上可以认为是一个日期时间的表示，而不是一个时间点。
+
+因此，在把 Date 转换为 LocalDateTime 的时候，需要通过 Date 的 toInstant 方法得到一个 UTC 时间戳进行转换，并需要提供当前的时区，这样才能把 UTC 时间转换为本地日期时间（的表示）。反过来，把 LocalDateTime 的时间表示转换为 Date 时，也需要提供时区，用于指定是哪个时区的时间表示，也就是先通过 atZone 方法把 LocalDateTime 转换为 ZonedDateTime，然后才能获得 UTC 时间戳。
+
+```java
+
+Date in = new Date();
+LocalDateTime ldt = LocalDateTime.ofInstant(in.toInstant(), ZoneId.systemDefault());
+Date out = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+```
+
+
+
+**问题**
+
+**datetime和 timestamp的区别**
+
+查看当前时区：
+
+```sql
+show variables like '%time_zone%';
+// 设置mysql时区
+set time_zone ='SYSTEM';
+show variables like '%time_zone%';
+```
+
+
+
+datetime：
+
+保存格式为YYYYMMDDHHMMSS（年月日时分秒）的整数，所以，它与时区无关，存入的是什么值就是什么值，不会根据当前时区进行转换（不会根据当前时区的变化而变化）
+
+
+
+
+
+timestamp：
+
+存入的是自1970-01-01午夜(格林尼治标准时间)以来的秒数，它和unix时间戳相同。所以它与时区有关，查询时转为相应的时区时间。比如，存储的是1970-01-01 00:00:00，客户端是北京，那么就加8个时区的小时1970-01-01 08:00:00（会根据当前的时区进行改变）
+
+例子：
+
+![img](https://img-blog.csdn.net/20160425150337187?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
+
+**插入两条数据，相同的时间。修改时区为0时区（格林尼治时区）后，查看时间，发现timestamp改变了，datetime没变**
+
+![img](https://img-blog.csdn.net/20160425150514051?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
