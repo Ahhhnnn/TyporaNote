@@ -151,9 +151,13 @@ $ kubectl get pod,svc
 
 测试 访问地址：http://NodeIP:Port
 
-![image-20201018205615471](assets/image-20201018205615471.png)
+![##](assets/image-20201018205615471.png)
 
+## 删除Pod
 
+```shell
+kubectl delete deployment nginx
+```
 
 # 总结
 

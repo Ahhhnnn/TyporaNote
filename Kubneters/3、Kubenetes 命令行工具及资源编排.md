@@ -108,3 +108,48 @@ status: {}
   
 
 ![image-20201018212620836](assets/image-20201018212620836.png)
+
+## yaml创建pod
+
+```shell
+kubectl apply -f web.yaml
+```
+
+![image-20201025155709397](assets/image-20201025155709397.png)
+
+![image-20201025155721678](assets/image-20201025155721678.png)
+
+### 暴露端口的yaml
+
+暴露端口
+
+```shell
+kubectl expose deployment nginx --port=80 --type=NodePort 
+```
+
+导出yaml
+
+```
+kubectl expose deployment web --port=80 --target-port=80 --dry-run -o yaml > webexpose.yaml
+```
+
+
+
+![image-20201025155858157](assets/image-20201025155858157.png)
+
+
+
+### 暴露端口
+
+```shell
+kubectl apply -f webexpose.yaml
+```
+
+
+
+## 查看日志
+
+```shell
+kubectl logs web-5dcb957ccc-2qls8
+```
+
