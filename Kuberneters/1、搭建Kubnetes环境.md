@@ -1,5 +1,11 @@
 # 搭建Kubernetes环境
 
+## Kubernetes 基本架构
+
+![image-20201220142751835](assets/image-20201220142751835.png)
+
+
+
 ## 环境准备
 
 准备一个或多台机器

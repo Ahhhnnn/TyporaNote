@@ -32,3 +32,11 @@ status: {}
 
 ```
 
+
+
+## 删除Pod
+
+```
+kubectl delete deployment name
+```
+

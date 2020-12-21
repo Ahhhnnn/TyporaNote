@@ -26,9 +26,18 @@
 
 ## 使用Deployment部署应用
 
+获取应用yaml文件
+
+```yaml
+# 生成到 mynginx.yaml 文件中
+kubectl create deployment web --image=nginx -o yaml --dry-run > mynginx.yaml
+```
+
 一般通过yaml文件进行部署
 
-
+```shell
+kubectl apply -f mynginx.yaml
+```
 
 
 
@@ -57,7 +66,7 @@ kubectl set image deployment web nginx=nginx:1.15
 kubectl rollout status deployment web
 ```
 
-
+![image-20201212203401430](assets/image-20201212203401430.png)
 
 ### 回滚
 
@@ -67,11 +76,15 @@ kubectl rollout status deployment web
 kubectl rollout history deployment web
 ```
 
+![image-20201212203451109](assets/image-20201212203451109.png)
+
 还原至上一个版本
 
 ```shell
 kubectl rollout undo deployment web
 ```
+
+
 
 回滚到指定版本
 
@@ -91,7 +104,7 @@ kubectl scale deployment web --replicas=10
 
 
 
-
+![image-20201212203713671](assets/image-20201212203713671.png)
 
 ## 部署有状态应用
 

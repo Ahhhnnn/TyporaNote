@@ -1,2 +1,0 @@
-# Kubenetes Secret.
-
