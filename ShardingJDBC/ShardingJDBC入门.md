@@ -1,5 +1,9 @@
 # ShardingJDBC入门
 
+官网地址：https://shardingsphere.apache.org/document/legacy/4.x/document/cn/manual/sharding-jdbc/configuration/config-spring-boot/#%E8%AF%BB%E5%86%99%E5%88%86%E7%A6%BB-1
+
+**注意选择版本**
+
 ## 基本概念
 
 ### ShardingJDBC执行流程
@@ -143,4 +147,93 @@ mybatis.type-aliases-package=com.he.sharding.entity
 
 
 ## 数据分片实践操作
+
+### 仅分表（同一数据库）
+
+创建数据库
+
+```sql
+CREATE TABLE `t_order_0` (
+  `id` bigint(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+CREATE TABLE `t_order_1` (
+  `id` bigint(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `order_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+```
+
+
+
+![image-20210401223450369](/Users/hening/Library/Application Support/typora-user-images/image-20210401223450369.png)
+
+配置文件
+
+```properties
+spring.shardingsphere.sharding.tables.t_order.actual-data-nodes=ds0.t_order_$->{0..1}
+spring.shardingsphere.sharding.tables.t_order.table-strategy.inline.sharding-column=order_id
+spring.shardingsphere.sharding.tables.t_order.table-strategy.inline.algorithm-expression=t_order_$->{order_id % 2}
+```
+
+编写mapper 进行插入order，期间变换order_id，观察入库情况
+
+![image-20210401223625557](/Users/hening/Library/Application Support/typora-user-images/image-20210401223625557.png)
+
+**发现order_id 为1 （1%2=1）和 2 （2%2=0）的数据分别落到了 t_order_1 和 t_order_0 中**
+
+
+
+## 分库分表
+
+创建数据库，数据表
+
+**两个数据库中数据表必须一致(之前做了主从同步，现在自动就有了环境)**
+
+![image-20210401223836834](/Users/hening/Library/Application Support/typora-user-images/image-20210401223836834.png)
+
+配置文件
+
+```properties
+
+```
+
+编写mapper插入数据
+
+**根据路由规则order_id =5 %2 =1 进入t_order_1  user_id = 1001 %2 =1 进入ds0 库** （其他库和表中没有这条数据，说明分库分表成功）
+
+![image-20210401224516908](/Users/hening/Library/Application Support/typora-user-images/image-20210401224516908.png)
+
+![image-20210401224618415](/Users/hening/Library/Application Support/typora-user-images/image-20210401224618415.png)
+
+
+
+查询数据
+
+**在mapper中直接编写sql，注意写逻辑表（注意配置文件中表名配置正确！！！）**
+
+查询时会根据配置文件中的（ds$->{0..1}.t_order_$->{0..1}） 表达式，**求出数据的笛卡尔积**
+
+![image-20210401230447875](/Users/hening/Library/Application Support/typora-user-images/image-20210401230447875.png)
+
+
+
+## 分片算法
+
+
+
+## 分片策略
+
+常用的两种
+
+### 行表达式分片策略
+
+对应InlineShardingStrategy。使用Groovy的表达式，提供对SQL语句中的=和IN的分片操作支持，只支持单分片键。对于简单的分片算法，可以通过简单的配置使用，从而避免繁琐的Java代码开发，如: `t_user_$->{u_id % 8}` 表示t_user表根据u_id模8，而分成8张表，表名称为`t_user_0`到`t_user_7`。
+
+### 标准分片策略
+
+对应StandardShardingStrategy。提供对SQL语句中的=, >, <, >=, <=, IN和BETWEEN AND的分片操作支持。StandardShardingStrategy只支持单分片键，提供PreciseShardingAlgorithm和RangeShardingAlgorithm两个分片算法。PreciseShardingAlgorithm是必选的，用于处理=和IN的分片。RangeShardingAlgorithm是可选的，用于处理BETWEEN AND, >, <, >=, <=分片，如果不配置RangeShardingAlgorithm，SQL中的BETWEEN AND将按照全库路由处理。
 
