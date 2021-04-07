@@ -223,11 +223,31 @@ spring.shardingsphere.sharding.tables.t_order.table-strategy.inline.algorithm-ex
 
 ## 分片算法
 
+**实现对应的分片算法后，由对应的分片策略进行处理**
 
+官网：由于分片算法和业务实现紧密相关，因此并未提供内置分片算法，而是通过分片策略将各种场景提炼出来，提供更高层级的抽象，并提供接口让应用开发者自行实现分片算法。
+
+### 精确分片算法
+
+对应PreciseShardingAlgorithm，用于处理使用单一键作为分片键的=与IN进行分片的场景。需要配合StandardShardingStrategy使用。
+
+### 范围分片算法
+
+对应RangeShardingAlgorithm，用于处理使用单一键作为分片键的BETWEEN AND、>、<、>=、<=进行分片的场景。需要配合StandardShardingStrategy使用。
+
+### 复合分片算法
+
+对应ComplexKeysShardingAlgorithm，用于处理使用多键作为分片键进行分片的场景，包含多个分片键的逻辑较复杂，需要应用开发者自行处理其中的复杂度。需要配合ComplexShardingStrategy使用。
+
+### Hint分片算法
+
+对应HintShardingAlgorithm，用于处理使用Hint行分片的场景。需要配合HintShardingStrategy使用。
 
 ## 分片策略
 
-常用的两种
+<img src="/Users/hening/Library/Application Support/typora-user-images/image-20210401232600229.png" alt="image-20210401232600229" style="zoom:67%;" />
+
+**一般需要自己实现分片算法实现分片，灵活度高（除了行表达式分片策略，可以提供简单的表达式完成分片）**
 
 ### 行表达式分片策略
 
