@@ -75,8 +75,6 @@ select  * form ds1.t_order_1;
 
 ![image-20210407232855438](/Users/hening/Library/Application Support/typora-user-images/image-20210407232855438.png)
 
-
-
 如果是stander策略，那么需要自己实现 **PreciseShardingAlgorithm**接口（必须）或者**RangeShardingAlgorithm**接口
 
 ![image-20210407233327725](/Users/hening/Library/Application Support/typora-user-images/image-20210407233327725.png)
