@@ -559,3 +559,367 @@ func more()func(num int)  {
 
 ## 指针和地址
 
+&：使用 &符号取出变量的内存地址
+
+使用 * 取出指针变量的值
+
+```go
+func main() {
+	// 指针的使用
+	var a int
+	a = 123
+	var b *int
+	b = &a
+	fmt.Println(a,b)
+}
+```
+
+![image-20210418174902477](assets/image-20210418174902477.png)
+
+因为使用指针，指向的是内存地址，那么修改一个指针的值，和他指向同一个内存地址的其他变量的值也会发生改变
+
+```go
+func main() {
+	// 指针的使用
+	var a int
+	a = 123
+	var b *int
+	b = &a
+	// 改变指针指向内存地址的值
+	*b = 321
+	fmt.Println(a,*b)
+}
+```
+
+ ### 数组指针&指针数组
+
+数组指针
+
+```go
+func main() {
+   // 数组指针
+   var arr [5]string
+   arr = [5]string{"1","2","3","4","5"}
+   fmt.Println(arr)
+   // arrP一个数组的指针
+   var arrP  *[5]string
+   arrP = &arr
+   fmt.Println(arr,arrP)
+}
+```
+
+指针数组，指数组中存的是指针
+
+```go
+func main() {
+	// 指针数组，数组中存了五个string的指针
+	var arr [5]*string
+	str1 := "1"
+	str2 := "2"
+	str3 := "3"
+	str4 := "4"
+	str5 := "5"
+  // 使用& 表示指针
+	arr = [5]*string{&str1,&str2,&str3,&str4,&str5}
+	fmt.Println(arr)
+	// 改变指针指向内存的值，同时str3也改变
+	*arr[2] = "123"
+	fmt.Println(str3)
+}
+```
+
+![image-20210418180046102](assets/image-20210418180046102.png)
+
+### func函数指针传参
+
+如果在func函数内，传入一个指针，在func内进行修改了值，那么函数外的变量也会被修改
+
+
+
+### map指针
+
+Key 和 value 都可以用指针标识
+
+```go
+func main() {
+	// map 指针
+	var m map[*string]string
+	m = map[*string]string{}
+	str := "hening"
+	m[&str] = str
+	fmt.Println(m)
+	fmt.Println(m[&str])
+}
+func main() {
+	// map 指针
+	var m map[string]*string
+	m = map[string]*string{}
+	str := "hening"
+	m["name"] = &str
+	fmt.Println(m)
+	fmt.Println(*m["name"])
+}
+```
+
+![image-20210418180645265](assets/image-20210418180645265.png)
+
+![image-20210418180802987](assets/image-20210418180802987.png)
+
+## 结构体Struct
+
+包含多种数据结构的特殊数据结构，**可以类比为java中的对象**
+
+声明一个结构体
+
+**type 名称 struct {**
+
+**}**
+
+注意，如果是直接使用new(Type) 初始化的一个结构体，那么得到的是一个指针
+
+```go
+package main
+
+import "fmt"
+
+type Hening struct {
+	Name string
+	Age int
+	Sex bool
+	Hobit []string
+}
+
+func main() {
+	// 声明结构体
+	var hening Hening
+	hening.Name = "hening"
+	hening.Age = 24
+	hening.Sex =true
+	hening.Hobit = []string{"睡觉","游戏"}
+	fmt.Println(hening)
+
+	// 隐式声明
+	duhan := Hening{
+		Name:  "duhan",
+		Age:   23,
+		Sex:   false,
+		Hobit: []string{"睡觉"},
+	}
+	fmt.Println(duhan)
+	// new 出来的拿到的是一个指针，指向内存地址
+	var hening2 = new(Hening)
+	hening2.Name = "hening2"
+	fmt.Println(hening2)
+	hening3 := hening2
+	hening3.Name = "hening3"
+	// 指向同一个内存地址的变量也会被修改
+	fmt.Println(hening2)
+}
+```
+
+### 结构体传参出参
+
+将定义的结构体变量，作为参数传递到func函数中即可，
+
+```go
+package main
+import "fmt"
+type Hening struct {
+	Name string
+	Age int
+	Sex bool
+	Hobit []string
+}
+
+func main() {
+	// 声明结构体
+	var hening Hening
+	hening.Name = "hening"
+	hening.Age = 24
+	hening.Sex =true
+	hening.Hobit = []string{"睡觉","游戏"}
+	du :=testhening(hening)
+	fmt.Println(du)
+}
+// 将Hening这个结构体，作为入参和出参
+func testhening(he Hening)(du Hening)  {
+	fmt.Println(he)
+	du.Name = "duhan"
+	return du
+}
+```
+
+### 结构体的指针
+
+结构体的指针取出后可以进行使用，并修改
+
+```go
+package main
+import "fmt"
+type Hening struct {
+	Name string
+	Age int
+	Sex bool
+	Hobit []string
+}
+func main() {
+	// 声明结构体
+	var hening Hening
+	hening.Name = "hening"
+	hening.Age = 24
+	hening.Sex =true
+	hening.Hobit = []string{"睡觉","游戏"}
+
+	var heningP *Hening
+	// 结构体的指针，取出后可以直接修改,并且修改的是内存地址里的值
+	heningP = &hening
+	heningP.Name= "duhan"
+	fmt.Println(hening,heningP)
+}
+```
+
+**注意点**
+
+**如果想通过*取出指针对应的变量进行修改，需要加上括号,不然IEA会任务你想修改的是 结构体里面Name这个指针（由于Name不是指针，所以会报错）**
+
+```go
+(*heningP).Name = "hening2"
+	fmt.Println(hening,*heningP)
+```
+
+### 给结构体声明方法
+
+声明一个func 然后如下 指定是那一个结构体，然后加上方法名以及入参出参
+
+func (he Hening)Song(name string)(res string)  {
+	res = he.Name + "唱了一首"+name+",观众觉得唱的不错"
+	fmt.Println("from song",res)
+	return res
+}
+
+```go
+package main
+
+import "fmt"
+
+type Hening struct {
+	Name string
+	Age int
+	Sex bool
+	Hobit []string
+}
+// 声明结构体的方法
+func (he Hening)Song(name string)(res string)  {
+	res = he.Name + "唱了一首"+name+",观众觉得唱的不错"
+	fmt.Println("from song",res)
+	return res
+}
+
+func main() {
+	// 声明结构体
+	var hening Hening
+	hening.Name = "hening"
+	hening.Age = 24
+	hening.Sex =true
+	hening.Hobit = []string{"睡觉","游戏"}
+	res := hening.Song("惊雷")
+	fmt.Println(res)
+}
+```
+
+### 嵌套结构体
+
+可以新声明一个结构体，然后在另一个结构体中使用该结构体作为变量，然后在生成实例可以，调用该结构体的变量以及方法等
+
+```go
+package main
+
+import "fmt"
+
+type Hening struct {
+	Name string
+	Age int
+	Sex bool
+	Hobit []string
+  // 嵌套Home 结构体
+	myHome Home
+}
+// 声明结构体的方法
+func (he Hening)Song(name string)(res string)  {
+	res = he.Name + "唱了一首"+name+",观众觉得唱的不错"
+	fmt.Println("from song",res)
+	return res
+}
+
+type Home struct {
+	address string
+}
+
+func (home *Home)OPen()()  {
+	fmt.Println("Open",home.address)
+}
+
+func main() {
+	// 声明结构体
+	var hening Hening
+	hening.Name = "hening"
+	hening.Age = 24
+	hening.Sex =true
+	hening.Hobit = []string{"睡觉","游戏"}
+	res := hening.Song("惊雷")
+	hening.myHome.address = "四川成都"
+	hening.myHome.OPen()
+	fmt.Println(res)
+}
+```
+
+## interface 接口的使用
+
+type 接口名称 interface {} 定义一个接口，里面定义接口的方法
+
+**定义结构体，然后定义结构体的方法，这个方法实现接口中的方法，那么就表示这个结构体属于这个接口的实现（类比java中的接口和实现类）一类统一行为的抽象**
+
+```go
+package main
+
+import "fmt"
+
+// 定义接口
+type Person interface {
+	Eat()
+	Run()
+}
+// 定义结构体
+type Hening struct {
+	Name string
+	Age int
+}
+type Duhan struct {
+	Name string
+	Age int
+}
+// 给结构体挂载接口的方法
+func (he Hening)Eat()  {
+	fmt.Println(he.Name,"Eat ")
+}
+func (he Hening)Run()  {
+	fmt.Println(he.Name,"Run ")
+}
+func (du Duhan)Eat()  {
+	fmt.Println(du.Name,"Eat ")
+}
+func (du Duhan)Run()  {
+	fmt.Println(du.Name,"Run ")
+}
+func main() {
+	var p Person
+	hening := Hening{
+		Name: "hening",
+		Age:  24,
+	}
+	p = hening
+	p.Eat()
+	p.Run()
+}
+```
+
