@@ -923,3 +923,190 @@ func main() {
 }
 ```
 
+## 并发神器 goroutine channel
+
+time.Sleep() 线程休眠
+
+time.second 时间单位 秒
+
+go + 方法名 ： 表示这个方法已协程的方式执行，不与Main在同一线程
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	go Run()
+	time.Sleep(1 * time.Second)
+}
+
+func Run()  {
+	fmt.Println("Run method")
+}
+```
+
+### 协程管理器
+
+实际代码中不可能手动进行睡眠，所有使用协程管理器 **sync.WaitGroup**
+
+```go
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+func main() {
+	var wg sync.WaitGroup
+  // add1 表示有一个协程执行，需要等到减为0
+	wg.Add(1)
+	// & 去除wg的指针
+	go Run(&wg)
+	wg.Wait()
+}
+// 注意使用指针传参，这样才能操作到真正的wg
+func Run(wg *sync.WaitGroup)  {
+	fmt.Println("Run method")
+  // Done 减1
+	wg.Done()
+}
+```
+
+### channel
+
+```go
+// 无缓冲channel
+c1 := make(chan int)
+
+// 有缓冲区channel
+c2 := make(chan int ,5)
+```
+
+向有缓冲的channel中存取
+
+c1 <- 1 表示存入channel c1
+
+<- c1 表示从c1中取
+
+```go
+func main() {
+	// 无缓冲channel
+	c1 := make(chan int,5)
+
+	// 有缓冲区channel
+	//c2 := make(chan int ,5)
+	c1 <- 1
+	fmt.Println(<-c1)
+}
+```
+
+使用协程向channel中存数据，然后再取数据（**和视频中观察不一样，不知道是不是版本升级导致**）
+
+并不是将channel缓冲装满才开始取，而是**在这个过程中就可能打印了出来**
+
+```go
+func main() {
+   // 缓冲channel
+   c1 := make(chan int,10)
+   // 协程 自执行函数
+   go func(){
+      for i:= 0;i<10;i++{
+         c1 <- i
+      }
+   }()
+   for i := 0; i < 10; i++ {
+      fmt.Println(<-c1)
+   }
+}
+```
+
+
+
+**可读可写channel**
+
+顾名思义就是只能读只能写的channel，不然会报错。
+
+注意可读 可写channel声明的差别 **<- 位置不同**
+
+```go
+func main() {
+	// 可读可写channel
+	c1 := make(chan int,10)
+	var readc <- chan int = c1
+	var write chan <- int = c1
+	write<-1
+	fmt.Println(<-readc)
+}
+```
+
+**关闭channel**
+
+close(chaneel)：如果不需要向channel中存数据了，那么就可以close，关闭后还是可以取数据的
+
+```go
+c1 := make(chan int)
+close(c1)
+```
+
+**如果想使用for range语法获取channel中的全部值，那么必须先close掉channel才能循环取**
+
+
+
+### select case语句
+
+```go
+func main() {
+	c1 := make(chan int,1)
+	c2 := make(chan int,1)
+	c3 := make(chan int,1)
+	c1 <- 1
+	// 如果case后的语句可以执行，那么就走这个分支 有点类型switch？
+  // 如果多个条件满足或者都满足，那么就随机执行（不像switch了）
+	select {
+	case <-c1:
+		fmt.Println("c1")
+	case <-c2:
+		fmt.Println("c2")
+	case <-c3:
+		fmt.Println("c3")
+	default:
+		fmt.Println("all false")
+	}
+}
+```
+
+### go协程与channel结合
+
+通过协程异步给channel中写值，然后再从channel中读取
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	c := make(chan int,1)
+	var readc <-chan int = c
+	var writec chan <- int = c
+	go setChan(writec)
+	getChan(readc)
+}
+func setChan(writce chan <- int)  {
+	for i := 0; i < 10; i++ {
+		writce <- i
+	}
+}
+func getChan(readc <-chan int)  {
+	for i := 0; i < 10; i++ {
+		fmt.Println("从getChan函数取值",<-readc)
+	}
+}
+```
+
