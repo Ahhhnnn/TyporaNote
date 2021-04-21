@@ -1110,3 +1110,200 @@ func getChan(readc <-chan int)  {
 }
 ```
 
+```go
+
+```
+
+# Go的断言Assert 和反射reflect
+
+Assert断言：**获取结构体的原始类型并断定一个接口为原始类型**
+
+反射reflect：**在编译期间，不知道原始类型的情况下，可以获取到原始数据类型、数据内容、方法并且能进行操作。**
+
+主要使用**reflect**包
+
+## 通过断言获取接口类型
+
+```go
+// 转换为指定Type的类型
+inter.(Type)
+```
+
+```go
+package main
+
+import (
+	"fmt"
+)
+type User struct {
+	Name string
+	Age int
+	Sex bool
+}
+
+type Student struct {
+	// 匿名参数
+	User
+}
+
+func (u User)sayName(name string)  {
+	fmt.Println("My name is",name)
+}
+func main() {
+	u := User{
+		Name: "hening",
+		Age:  24,
+		Sex:  true,
+	}
+	check(u)
+}
+func check(inter interface{})  {
+	fmt.Println(inter.(User).Name)
+	fmt.Println(inter.(User).Age)
+}
+
+```
+
+判断原始类型
+
+```go
+inter.(type)
+
+func main() {
+	u := User{
+		Name: "hening",
+		Age:  24,
+		Sex:  true,
+	}
+	s := Student{u}
+	check(u)
+	check(s)
+}
+func check(inter interface{})  {
+  // 判断原始类型
+	switch  inter.(type){
+	case User:
+		fmt.Println("User")
+	case Student:
+		fmt.Println("Student")
+	}
+}
+```
+
+## 通过reflect获取类型 数据
+
+reflect.TypeOf(inter)：获取类型
+
+reflect.ValueOf(inter)：获取数据
+
+```go
+func main() {
+	u := User{
+		Name: "hening",
+		Age:  24,
+		Sex:  true,
+	}
+	s := Student{"初一四班",u}
+	check(u)
+	check(s)
+}
+func check(inter interface{})  {
+	// 反射
+	fmt.Println(reflect.TypeOf(inter))
+	fmt.Println(reflect.ValueOf(inter))
+}
+```
+
+![image-20210421222035838](assets/image-20210421222035838.png)
+
+
+
+## reflect 获取指定字段名称、指定下标字段
+
+v := reflect.ValueOf(inter)  所有字段的值
+
+v.FieldByName("Class")：获取指定字段的值
+
+v.FieldByIndex([]int{1})：获取指定下标的值
+
+```go
+func check(inter interface{})  {
+	t := reflect.TypeOf(inter)
+	v := reflect.ValueOf(inter)
+	// 反射
+	fmt.Println(t,v)
+	fmt.Println(v.FieldByName("Class"))
+	// 需要传入一个数组
+	fmt.Println(v.FieldByIndex([]int{1}))
+}
+```
+
+![image-20210421222707738](assets/image-20210421222707738.png)
+
+## reflect 判断原始数据类型
+
+```go
+fmt.Println(t.Kind())
+// 结合reflect的常量来进行判断
+reflect.Struct
+reflect.int
+...
+```
+
+## 通过reflect 修改数据
+
+**注意使用reflect 修改数据需要传地址进去（指针）才能修改到实际的数据**
+
+```go
+func main() {
+	u := User{
+		Name: "hening",
+		Age:  24,
+		Sex:  true,
+	}
+	s := Student{"初一四班",u}
+	//check(u)
+  // 注意传入指针
+	check(&s)
+	fmt.Println(s)
+}
+func check(inter interface{})  {
+	t := reflect.TypeOf(inter)
+	v := reflect.ValueOf(inter)
+	// 反射
+	fmt.Println(t,v)
+	e := v.Elem()
+	e.FieldByName("Class").SetString("初二四班")
+}
+```
+
+![image-20210421223250207](assets/image-20210421223250207.png)
+
+## reflect调用方法（不常用？）
+
+**备注：**
+
+**将SayName方法名改为小写后，执行m := v.Method(0)会报错，不知道为啥？？**
+
+m := v.MethodByName("SayName")
+
+```go
+// 方法名字大小写会导致 反射调用方法报错？？
+func (u User)SayName(name string)  {
+	fmt.Println("My name is",name)
+}
+func check(inter interface{})  {
+	t := reflect.TypeOf(inter)
+	v := reflect.ValueOf(inter)
+	// 反射
+	fmt.Println(t,v)
+  m := v.Method(0)
+	//m := v.MethodByName("SayName")
+	m.Call([]reflect.Value{reflect.ValueOf("hening")})
+}
+```
+
+
+
+
+
