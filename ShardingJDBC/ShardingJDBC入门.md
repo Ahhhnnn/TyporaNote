@@ -105,14 +105,14 @@ spring.main.allow-bean-definition-overriding=true
 # 配置第 1 个数据源
 spring.shardingsphere.datasource.ds0.type=com.alibaba.druid.pool.DruidDataSource
 spring.shardingsphere.datasource.ds0.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.shardingsphere.datasource.ds0.url=jdbc:mysql://47.100.214.147:3307/20210326?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+spring.shardingsphere.datasource.ds0.url=jdbc:mysql://xx.xxx.xx.xx:3307/20210326?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&serverTimezone=Asia/Shanghai
 spring.shardingsphere.datasource.ds0.username=root
 spring.shardingsphere.datasource.ds0.password=123456
 
 # 配置第 2 个数据源
 spring.shardingsphere.datasource.ds1.type=com.alibaba.druid.pool.DruidDataSource
 spring.shardingsphere.datasource.ds1.driver-class-name=com.mysql.cj.jdbc.Driver
-spring.shardingsphere.datasource.ds1.url=jdbc:mysql://47.100.214.147:3308/20210326?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&serverTimezone=Asia/Shanghai
+spring.shardingsphere.datasource.ds1.url=jdbc:mysql://xx.xxx.xx.xx:3308/20210326?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&serverTimezone=Asia/Shanghai
 spring.shardingsphere.datasource.ds1.username=root
 spring.shardingsphere.datasource.ds1.password=123456
 # 打印sql

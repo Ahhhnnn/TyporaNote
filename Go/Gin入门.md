@@ -293,9 +293,72 @@ type Func func(fl FieldLevel) bool
 
 ## 文件上传和返回
 
+c.FormFile("file")：读取文件
 
+c.SaveUploadedFile(file, "./"+file.Filename) ：保存文件到指定位置
 
+file.Filename：获取上传的文件名称
 
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+)
+
+func main() {
+	r := gin.Default()
+	r.POST("/upload", func(c *gin.Context) {
+		file,_ := c.FormFile("file")
+		fmt.Println(file.Filename)
+		// 保存文件到指定位置
+		c.SaveUploadedFile(file, "./"+file.Filename)
+		c.JSON(200,gin.H{
+			"message":file.Filename,
+		})
+	})
+	r.Run(":8081") // 监听并在 0.0.0.0:8080 上启动服务
+}
+```
+
+### 多文件上传
+
+form,_ := c.MultipartForm() ：读取多个文件到 **Form** 结构体中
+
+form.File["file"] ： 拿到为file参数的值，拿到的是一个map结构
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+)
+
+func main() {
+	r := gin.Default()
+	r.POST("/upload", func(c *gin.Context) {
+
+		form,_ := c.MultipartForm()
+    // files 是一个map
+		files := form.File["file"]
+		// 保存文件到指定位置
+    // 采用range遍历map,忽略掉key，只拿到file
+    // key是文件的下标，分别为 0，1，2
+		for _,file := range files{
+			fmt.Println(file.Filename)
+			c.SaveUploadedFile(file, "./"+file.Filename)
+		}
+		c.JSON(200,gin.H{
+			"message":files,
+		})
+	})
+	r.Run(":8081") // 监听并在 0.0.0.0:8080 上启动服务
+}
+```
+
+![image-20210424163740019](assets/image-20210424163740019.png)
 
 ## 中间件和路由分组
 
@@ -303,13 +366,125 @@ type Func func(fl FieldLevel) bool
 
 对相同前缀的请求进行统一的管理和规范
 
+```go
+// 该组的请求必须都加上v1前缀
+r.Group("/v1") 
+```
 
+```go
+func main() {
+	router := gin.Default()
+
+	// Simple group: v1
+	v1 := router.Group("/v1")
+	{
+		v1.POST("/login", loginEndpoint)
+		v1.POST("/submit", submitEndpoint)
+		v1.POST("/read", readEndpoint)
+	}
+
+	// Simple group: v2
+	v2 := router.Group("/v2")
+	{
+		v2.POST("/login", loginEndpoint)
+		v2.POST("/submit", submitEndpoint)
+		v2.POST("/read", readEndpoint)
+	}
+
+	router.Run(":8080")
+}
+```
 
 ### 创建中间件
 
 在进入方法前，方法执行完后执行一系列操作。（有点类型java的切面？）
 
+t := time.Now():当前时间
+
+latency := time.Since(t) ：获取消耗时间，传入一个时间t
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"log"
+	"time"
+)
+// 自定义中间件
+func Logger() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		t := time.Now()
+
+		// Set example variable
+		c.Set("example", "12345")
+		fmt.Println("before request")
+		// before request
+		// 执行请求的逻辑
+		c.Next()
+		fmt.Println("after request")
+		// after request
+		// 消耗时间
+		latency := time.Since(t)
+		log.Print("latency",latency)
+
+		// access the status we are sending
+		status := c.Writer.Status()
+		log.Println("status",status)
+	}
+}
+func main() {
+	r := gin.Default()
+	vg := r.Group("/log").Use(Logger())
+	{
+		vg.POST("/text", func(c *gin.Context) {
+			example := c.MustGet("example").(string)
+			fmt.Println(example)
+			c.JSON(200, gin.H{
+				"message": "success",
+				"data":    example,
+			})
+		})
+	}
+	r.Run(":8081") // 监听并在 0.0.0.0:8080 上启动服务
+}
+```
 
 
 
+## Gin 日志
+
+一般Gin日志用来做控制台显示即可
+
+可以结合其他开源go log框架做日志持久化、格式化等操作包括：[logrus](https://github.com/Sirupsen/logrus)
+
+可以对日志对象进行封装为一个全局的，项目中可以调用同一个logger对象
+
+```go
+func main() {
+    // 禁用控制台颜色
+    gin.DisableConsoleColor()
+
+    // 创建记录日志的文件
+    f, _ := os.Create("gin.log")
+    gin.DefaultWriter = io.MultiWriter(f)
+
+    // 如果需要将日志同时写入文件和控制台，请使用以下代码
+    // gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+
+    router := gin.Default()
+    router.GET("/ping", func(c *gin.Context) {
+        c.String(200, "pong")
+    })
+
+    router.Run(":8080")
+}
+```
+
+### 日志配置
+
+```go
+log.SetPrefix()://设置前缀
+```
 
