@@ -75,7 +75,18 @@ r.GET("/query", func(c *gin.Context) {
 
 ### Post
 
-支持body传参
+支持body传参 和 Query传参
+
+**可以同时在url中传参数 和 body中传参**
+
+可以通过以下方式获取参数
+
+```go
+id := c.Query("id")
+page := c.DefaultQuery("page", "0")
+name := c.PostForm("name")
+message := c.PostForm("message")
+```
 
 ```go
 r.POST("/query", func(c *gin.Context) {
@@ -224,7 +235,24 @@ func main() {
 
 ![image-20210423224745861](assets/image-20210423224745861.png)
 
-**自定义校验**
+###  绑定Get 或者 Post 参数
+
+ShoudBind ：Get请求或者Post请求都能进行绑定到结构体中
+
+```
+var person Person
+	// If `GET`, only `Form` binding engine (`query`) used.
+	// 如果是Get，那么接收不到请求中的Post的数据？？
+	// 如果是Post, 首先判断 `content-type` 的类型 `JSON` or `XML`, 然后使用对应的绑定器获取数据.
+	// See more at https://github.com/gin-gonic/gin/blob/master/binding/binding.go#L48
+	if c.ShouldBind(&person) == nil {
+		log.Println(person.Name)
+		log.Println(person.Address)
+		log.Println(person.Birthday)
+	}
+```
+
+### 自定义验证器
 
 在**binding**中增加自定义验证标签
 
@@ -451,7 +479,39 @@ func main() {
 }
 ```
 
+## 使用分组及中间件（项目常用）
 
+AuthRequired()：自定义中间件
+
+loginEndpoint、submitEndpoint：**请求对应执行的方法（方法中封装统一的返回信息）**
+
+```go
+authorized := r.Group("/")
+	// per group middleware! in this case we use the custom created
+	// AuthRequired() middleware just in the "authorized" group.
+	authorized.Use(AuthRequired())
+	{
+		authorized.POST("/login", loginEndpoint)
+		authorized.POST("/submit", submitEndpoint)
+		authorized.POST("/read", readEndpoint)
+
+		// nested group
+		testing := authorized.Group("testing")
+		testing.GET("/analytics", analyticsEndpoint)
+	}
+
+// 请求对应执行的方法，接受参数*gin.Context
+func loginEndpoint(c *gin.Context) {
+	var person Person
+	if c.ShouldBindQuery(&person) == nil {
+		log.Println("====== Only Bind By Query String ======")
+		log.Println(person.Name)
+		log.Println(person.Address)
+	}
+  // 返回结果，也可以使用c.Json 自定义返回信息
+	c.String(200, "Success")
+}
+```
 
 ## Gin 日志
 
@@ -486,5 +546,86 @@ func main() {
 
 ```go
 log.SetPrefix()://设置前缀
+```
+
+## 接口返回格式
+
+支持XML、JSON、YAML和ProtoBuf 渲染
+
+### JSON
+
+```go
+c.JSON(http.StatusOK, gin.H{"message": "hey", "status": http.StatusOK})
+```
+
+支持返回结构体
+
+```go
+r.GET("/moreJSON", func(c *gin.Context) {
+		// You also can use a struct
+		var msg struct {
+			Name    string `json:"user"`
+			Message string
+			Number  int
+		}
+		msg.Name = "Lena"
+		msg.Message = "hey"
+		msg.Number = 123
+		// Note that msg.Name becomes "user" in the JSON
+		// Will output  :   {"user": "Lena", "Message": "hey", "Number": 123}
+		c.JSON(http.StatusOK, msg)
+	}
+```
+
+### XML
+
+```go
+r.GET("/someXML", func(c *gin.Context) {
+		c.XML(http.StatusOK, gin.H{"message": "hey", "status": http.StatusOK})
+	})
+```
+
+![image-20210425231249871](assets/image-20210425231249871.png)
+
+### YAML
+
+```go
+r.GET("/someYAML", func(c *gin.Context) {
+	c.YAML(http.StatusOK, gin.H{"message": "hey", "status": http.StatusOK})
+})
+```
+### **SecureJSON**
+
+使用SecureJSON可以防止json劫持，如果返回的数据是数组，则会默认在返回值前加上`"while(1)"`
+
+### **JSONP**
+
+使用JSONP可以跨域传输，如果参数中存在回调参数，那么返回的参数将是回调函数的形式
+
+### AsciiJSON
+
+使用AsciiJSON将使特殊字符编码
+
+
+
+## Gin 重定向
+
+```go
+r.GET("/test", func(c *gin.Context) {
+	c.Redirect(http.StatusMovedPermanently, "http://www.baidu.com/")
+})
+```
+
+### 路由重定向
+
+```go
+r.GET("/test", func(c *gin.Context) {
+  	// 路由到项目的地址
+    c.Request.URL.Path = "/test2"
+    r.HandleContext(c)
+})
+r.GET("/test2", func(c *gin.Context) {
+    c.JSON(200, gin.H{"hello": "world"})
+})
 ```
 

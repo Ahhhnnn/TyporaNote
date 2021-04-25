@@ -1303,7 +1303,58 @@ func check(inter interface{})  {
 }
 ```
 
+# 错误处理
+
+使用默认的错误
+
+```go
+// 默认的错误返回
+errors.New("math: square root of negative number")
+```
+
+```go
+// 自定义错误结构体，实现Error接口
+type DivideError struct {
+	dividee int
+	divider int
+}
+
+func (de DivideError)Error()(errorMsg string)  {
+	strFormat := `
+    Cannot proceed, the divider is zero.
+    dividee: %d
+    divider: 0
+`
+	return fmt.Sprintf(strFormat, de.dividee)
+}
+// 定义 `int` 类型除法运算的函数
+func Divide(varDividee int, varDivider int) (result int, errorMsg string) {
+	if varDivider == 0 {
+		dData := DivideError{
+			dividee: varDividee,
+			divider: varDivider,
+		}
+		// 调用Error方法
+		errorMsg = dData.Error()
+		return
+	} else {
+		return varDividee / varDivider, ""
+	}
+
+}
+func main() {
+	// 正常情况
+	if result, errorMsg := Divide(100, 10); errorMsg == "" {
+		fmt.Println("100/10 = ", result)
+	}
+	// 当除数为零的时候会返回错误信息
+	if _, errorMsg := Divide(100, 0); errorMsg != "" {
+		fmt.Println("errorMsg is: ", errorMsg)
+	}
+}
+```
 
 
 
+![image-20210425221122452](assets/image-20210425221122452.png)
 
