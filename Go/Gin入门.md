@@ -612,7 +612,7 @@ r.GET("/someYAML", func(c *gin.Context) {
 
 ```go
 r.GET("/test", func(c *gin.Context) {
-	c.Redirect(http.StatusMovedPermanently, "http://www.baidu.com/")
+	c.Redirect(http.StatusMovedPermanently, "http://www.google.com/")
 })
 ```
 
