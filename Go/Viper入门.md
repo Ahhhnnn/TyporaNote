@@ -14,7 +14,9 @@ viper 是一个配置解决方案，拥有丰富的特性：
 
 ## 设置默认值
 
-```
+viper.SetDefault()
+
+```go
 package main
 
 import (
@@ -30,6 +32,23 @@ func main() {
 	fmt.Println(ContentDir)
 	fmt.Println(viper.Get("LayoutDir"))
 }
+```
+
+## 读取配置文件
+
+
+
+```go
 
 ```
+
+
+
+### 忽略读取错误
+
+如果没有读取到配置文件，那么可以设置忽略错误，继续向下走
+
+
+
+## 写配置文件
 

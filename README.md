@@ -1,2 +1,9 @@
 # TyporaNote
-学习笔记记录
+平时学习笔记记录
+- Java
+- Go
+- Vue
+- SpringBoot
+- Gin
+- Mybatis
+...
