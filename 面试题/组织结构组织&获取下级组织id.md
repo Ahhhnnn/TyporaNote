@@ -71,6 +71,47 @@ public class OrgTest {
         }
         return current;
     }
+  
+  // 迭代法
+    private static List<Node> buildTreeFor(Collection<Node> nodes){
+        List<Node> result = new ArrayList<>();
+        for (Node node : nodes) {
+            if (StringUtils.isEmpty(node.getpId())) {
+                result.add(node);
+            }
+            for (Node child : nodes) {
+                if (StringUtils.isNotEmpty(child.getpId())
+                        && child.getpId().equals(node.getId())) {
+                    if (node.getChildren() == null) {
+                        node.setChildren(new ArrayList<>());
+                    }
+                    node.getChildren().add(child);
+                }
+            }
+        }
+        return result;
+    }
+
+    // 迭代法 优化 子找父
+    private static List<Node> buildTreeForFast(Collection<Node> nodes){
+        List<Node> result = new ArrayList<>();
+        for (Node node : nodes) {
+            if (StringUtils.isEmpty(node.getpId())) {
+                result.add(node);
+                continue;
+            }
+            for (Node parent : nodes) {
+                if (StringUtils.isNotEmpty(node.getpId()) && node.getpId().equals(parent.getId())) {
+                    if (parent.getChildren() == null) {
+                        parent.setChildren(new ArrayList<>());
+                    }
+                    parent.getChildren().add(node);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 }
 ```
 
