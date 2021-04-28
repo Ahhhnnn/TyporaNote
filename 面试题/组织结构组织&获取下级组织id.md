@@ -167,11 +167,12 @@ public class OrgMapTest {
         if (CollectionUtils.isEmpty(strings)) {
             return Collections.emptySet();
         }
-        child.addAll(strings);
         for (String string : strings) {
-            child.addAll(getChild(string, map,child));
+            child.add(string);
+            getChild(string, map, child);
         }
         return child;
+    }
     
 ```
 
