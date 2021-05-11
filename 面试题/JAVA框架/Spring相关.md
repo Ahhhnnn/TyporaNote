@@ -99,3 +99,6 @@ Spring AOP 已经集成了 AspectJ ，AspectJ 应该算的上是 Java 生态系�
 
 ### Spring Bean的声明周期
 
+![img](assets/181453414212066.png)
+
+![img](assets/181454040628981.png)
