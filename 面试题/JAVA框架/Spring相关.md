@@ -102,3 +102,15 @@ Spring AOP 已经集成了 AspectJ ，AspectJ 应该算的上是 Java 生态系�
 ![img](assets/181453414212066.png)
 
 ![img](assets/181454040628981.png)
+
+
+
+## SpringIOC初始化流程
+
+1. Spring启动。
+2. 加载配置文件，xml、JavaConfig、注解、其他形式等等，将描述我们自己定义的和Spring内置的定义的Bean加载进来。
+3. 加载完配置文件后将配置文件转化成统一的Resource来处理。
+4. 使用Resource解析将我们定义的一些配置都转化成Spring内部的标识形式：BeanDefinition。
+5. 在低级的容器BeanFactory中，到这里就可以宣告Spring容器初始化完成了，Bean的初始化是在我们使用Bean的时候触发的；在高级的容器ApplicationContext中，会自动触发那些lazy-init=false的单例Bean，让Bean以及依赖的Bean进行初始化的流程，初始化完成Bean之后高级容器也初始化完成了。（**Bean初始化流程看上面**）
+6. 在我们的应用中使用Bean。
+7. Spring容器关闭，销毁各个Bean。
