@@ -103,7 +103,7 @@ Spring AOP 已经集成了 AspectJ ，AspectJ 应该算的上是 Java 生态系�
 
 ![img](assets/181454040628981.png)
 
-
+![image-20210516223805796](assets/image-20210516223805796.png)
 
 ## SpringIOC初始化流程
 
