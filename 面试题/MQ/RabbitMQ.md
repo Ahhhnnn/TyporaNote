@@ -98,3 +98,31 @@ RabbitMq出现顺序错乱场景
 
 https://github.com/shishan100/Java-Interview-Advanced/blob/master/docs/high-concurrency/mq-design.md
 
+
+
+## MQ高可用
+
+### 单机模式
+
+只部署一个实例，线上不用
+
+
+
+### 集群模式
+
+部署 多个rabbitmq节点， A、B、C
+
+A是主节点，那么BC连接A后会同步A的元数据（exchange、queue、vhost等）不会冗余真正的数据信息。当消息生产者连接BC时，BC起到一个转发作用，通过同步的元数据，转发数据存储到A节点中，消费者连接BC时，同样起到一个转发作用，会将数据从A拉取到本地然后发送给消费者。
+
+并不能实现真正的高可用。能够提高处理能力。
+
+
+
+### 镜像部署模式
+
+rabbitmq真正高可用模式，每个节点都冗余了数据信息，消费者、生产者连接那个节点都可以，如果一个节点挂了，其他节点还能正常提供服务。
+
+
+
+
+
