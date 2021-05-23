@@ -68,3 +68,113 @@ Node构成FIFO的同步队列来完成线程获取锁的排队工作
 
 - 如果当前线程获取同步状态失败（锁）时，AQS 则会将当前线程以及等待状态等信息构造成一个节点（Node）并将其加入同步队列，同时会阻塞当前线程
 - 当同步状态释放时，则会把节点中的线程唤醒，使其再次尝试获取同步状态
+
+
+
+### 实现原理
+
+AQS提供的方法 可以分为多层
+
+![img](assets/82077ccf14127a87b77cefd1ccf562d3253591.png)
+
+当有自定义同步器接入时，只需重写第一层所需要的部分方法即可，不需要关注底层具体的实现流程。当自定义同步器进行加锁或者解锁操作时，先经过第一层的API进入AQS内部方法，然后经过第二层进行锁的获取，接着对于获取锁失败的流程，进入第三层和第四层的等待队列处理，而这些处理方式均依赖于第五层的基础数据提供层。
+
+
+
+比如ReentrantLock 实现了公平锁和非公平锁
+
+内部的Sync类继承了AbstractQueuedSynchronizer
+
+NonfairSync  和 FairSync 继承了Sync类
+
+
+
+lock方法就是分别调用了公平锁和非公平是的得方法
+
+**非公平锁**
+
+直接通过cas设置state的值，如果成功，设置独占线程为自己，如果失败则调用aqs的acquire方法
+
+```java
+final void lock() {
+            if (compareAndSetState(0, 1))
+                setExclusiveOwnerThread(Thread.currentThread());
+            else
+                acquire(1);
+        }
+```
+
+**acquire 方法中需要调用 tryAcquire方法，这个方法需要同步起自己实现**
+
+非公平锁的实现
+
+同样是使用cas实现，如果失败，**那么会加入到阻塞队列中，由acquireQueued方法来控制获取锁**
+
+```java
+public final void acquire(int arg) {
+        if (!tryAcquire(arg) &&
+            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+            selfInterrupt();
+    }
+
+protected final boolean tryAcquire(int acquires) {
+            return nonfairTryAcquire(acquires);
+        }
+
+final boolean nonfairTryAcquire(int acquires) {
+            final Thread current = Thread.currentThread();
+            int c = getState();
+            if (c == 0) {
+                if (compareAndSetState(0, acquires)) {
+                    setExclusiveOwnerThread(current);
+                    return true;
+                }
+            }
+            else if (current == getExclusiveOwnerThread()) {
+                int nextc = c + acquires;
+                if (nextc < 0) // overflow
+                    throw new Error("Maximum lock count exceeded");
+                setState(nextc);
+                return true;
+            }
+            return false;
+        }
+```
+
+公平锁
+
+公平锁的lock方法直接调用 aqs的 acquire方法获取锁
+
+**不同于非公平的，会通过hasQueuedPredecessors方法判断是否有其他线程在等待锁，如果有那么获取失败，加入阻塞队列获取锁**
+
+```java
+public final void acquire(int arg) {
+        if (!tryAcquire(arg) &&
+            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+            selfInterrupt();
+    }
+
+protected final boolean tryAcquire(int acquires) {
+            final Thread current = Thread.currentThread();
+            int c = getState();
+            if (c == 0) {
+                if (!hasQueuedPredecessors() &&
+                    compareAndSetState(0, acquires)) {
+                    setExclusiveOwnerThread(current);
+                    return true;
+                }
+            }
+            else if (current == getExclusiveOwnerThread()) {
+                int nextc = c + acquires;
+                if (nextc < 0)
+                    throw new Error("Maximum lock count exceeded");
+                setState(nextc);
+                return true;
+            }
+            return false;
+        }
+```
+
+
+
+ 
