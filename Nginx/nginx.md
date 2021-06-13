@@ -56,7 +56,7 @@ sudo systemctl start nginx
 sudo systemctl status nginx
 ```
 
-修改nginx.conf 监听47.100.214.147 的8083端口
+修改nginx.conf 监听xx.xxx.xx.xx 的8083端口
 
 将请求转发到本机的tomcat应用上地址为 127.0.0.1:8000/weacherSec
 

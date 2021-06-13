@@ -176,7 +176,7 @@ application.properties
 
 ```properties
 ## 数据源配置
-spring.datasource.url=jdbc:mysql://47.100.214.147:3306/shiro?characterEncoding=utf8 & useSSL=false & serverTimezone=UTC & rewriteBatchedStatements=true
+spring.datasource.url=jdbc:mysql://xx.xxx.xx.xx:3306/shiro?characterEncoding=utf8 & useSSL=false & serverTimezone=UTC & rewriteBatchedStatements=true
 spring.datasource.username=root
 spring.datasource.password=123456
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver

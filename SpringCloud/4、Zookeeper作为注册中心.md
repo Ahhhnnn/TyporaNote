@@ -144,7 +144,7 @@ spring:
   cloud:
     zookeeper:
        # 注册到zookeeper地址，若为zookeeper集群，以逗号分割，可以表示为ip01:port01,ip02:port02,ip03:port03以此类推
-      connect-string: 47.100.214.147:2181
+      connect-string: xx.xxx.xx.xx:2181
 ```
 
 启动项目查看是否注册到zk
@@ -237,7 +237,7 @@ spring:
   cloud:
     zookeeper:
       # 注册到zookeeper地址，若为zookeeper集群，以逗号分割，可以表示为ip01:port01,ip02:port02,ip03:port03以此类推
-      connect-string: 47.100.214.147:2181
+      connect-string: xx.xxx.xx.xx:2181
 ```
 
 启动项目后发现也注册到了zk

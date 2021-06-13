@@ -117,7 +117,7 @@ store {
     ## mysql/oracle/h2/oceanbase etc.
     db-type = "mysql"
     driver-class-name = "com.mysql.jdbc.Driver"
-    url = "jdbc:mysql://47.100.214.147:3306/seata"
+    url = "jdbc:mysql://xx.xxx.xx.xx:3306/seata"
     user = "root"
     password = "123456"
   }
@@ -392,7 +392,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     # mysql驱动类
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://47.100.214.147:3306/seata_account?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
+    url: jdbc:mysql://xx.xxx.xx.xx:3306/seata_account?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=GMT%2B8
     username: root
     password: 123456
 feign:

@@ -738,7 +738,7 @@ spring.datasource.platform=mysql
 db.num=1
 
 ### Connect URL of DB:
-db.url.0=jdbc:mysql://47.100.214.147:3306/nacos_config?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true
+db.url.0=jdbc:mysql://xx.xxx.xx.xx:3306/nacos_config?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true
 db.user=root
 db.password=123456
 ```
@@ -786,7 +786,7 @@ docker run --env MODE=standalone --name nacos3335 -d -p 3335:8848 nacos/nacos-se
 
 
 
-**访问47.100.214.147:3333/nacos 成功访问到nacos，说明docker部署nacos成功**
+**访问xx.xxx.xx.xx:3333/nacos 成功访问到nacos，说明docker部署nacos成功**
 
 ![image-20200615221709653](assets/image-20200615221709653.png)
 
@@ -856,7 +856,7 @@ spring.datasource.platform=mysql
 db.num=1
 
 ### Connect URL of DB:
-db.url.0=jdbc:mysql://47.100.214.147:3306/nacos_config?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true
+db.url.0=jdbc:mysql://xx.xxx.xx.xx:3306/nacos_config?characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true
 db.user=root
 db.password=123456
 ```
@@ -879,7 +879,7 @@ spring:
       discovery:
 #        server-addr: localhost:8848
         # 换成nginx的1111端口
-        server-addr: 47.100.214.147:1111
+        server-addr: xx.xxx.xx.xx:1111
 
 management:
   endpoints:
@@ -917,7 +917,7 @@ spring:
       discovery:
         server-addr: localhost:8848 # 注册中心
       config:
-        server-addr: 47.100.214.147:1111 # 配置中心
+        server-addr: xx.xxx.xx.xx:1111 # 配置中心
         file-extension: yml # 这里指定的文件格式需要和nacos上新建的配置文件后缀相同，否则读不到
         #group: TEST_GROUP
         #namespace: 0af7f0fc-ffef-43ca-a8e2-243decacca3f
