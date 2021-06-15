@@ -4,6 +4,26 @@
 
 ![image-20201206231916105](assets/image-20201206231916105.png)
 
+## 查看数据结构
+
+命令：object encoding
+
+当超过 512个元素时，有压缩列表，转换为双向链表
+
+```
+127.0.0.1:6379> rpush listkey e1 e2 e3
+(integer) 3
+127.0.0.1:6379> object encoding listkey
+"ziplist"
+
+
+
+127.0.0.1:6379> rpush listkey e4 e5 ... e512 e513
+(integer) 513
+127.0.0.1:6379> object encoding listkey
+"linkedlist"
+```
+
 
 
 ## 键和值用什么结构组织？
