@@ -215,6 +215,55 @@ which shutdown
 
 
 
+<<<<<<< HEAD
+# 网络故障排除命令
+
+![image-20210318150529713](assets/image-20210318150529713.png)
+
+# 软件安装
+
+## yum配置文件
+
+路径  /etc/yum.repos.d/CentOS-Base.repo
+
+阿里云服务器默认base路径就是aliyun的，不用手动修改
+
+![image-20210318151839101](assets/image-20210318151839101.png)
+
+![image-20210318151908533](assets/image-20210318151908533.png)
+
+## 常用选项
+
+![image-20210318151944361](assets/image-20210318151944361.png)
+
+## 二进制编译
+
+![image-20210318152648528](assets/image-20210318152648528.png)
+
+# ps  and top 命令
+
+常用命令
+
+ps
+
+ps -e
+
+ps -ef
+
+ps -eLf
+
+pstree
+
+**都可以和more命令组合起来使用**
+
+
+
+top
+
+**各个项的含义**
+
+![image-20210318155348210](assets/image-20210318155348210.png)
+=======
 # 文本操作篇
 
 ### 正则表达式
@@ -374,6 +423,4 @@ awk -f avg.awk 文件名
 ![image-20210411232551499](assets/image-20210411232551499.png)
 
 ![image-20210411232621522](assets/image-20210411232621522.png)
-
-
 
