@@ -64,6 +64,12 @@ create /目录名称 value
 delete /目录名称
 ```
 
+## Zookeeper 集群安装
+
+docker 安装zookeeper 集群
+
+https://www.jianshu.com/p/f9b257a3f948
+
 
 
 ## 进入Kafka
