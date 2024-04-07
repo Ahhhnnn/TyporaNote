@@ -24,7 +24,7 @@ print ("Hello, Python!")
 
 ### 多行语句
 
-Python 通常是一行写完一条语句，但如果语句很长，我们可以使用反斜杠 **\** 来实现多行语句
+Python 通常是一行写完一条语句，但如果语句很长，我们可以使用反斜杠 **\\** 来实现多行语句
 
 ```python
 total = item_one + \
@@ -197,6 +197,10 @@ print (tuple + tinytuple) # 连接元组
 parame = {value01,value02,...}
 或者
 set(value)
+
+# Python 集合
+set1 = {1, 2, 3, 4}            # 直接使用大括号创建集合
+set2 = set([4, 5, 6, 7])      # 使用 set() 函数从列表创建集合
 ```
 
 ```python
@@ -227,6 +231,16 @@ print(a & b)     # a 和 b 的交集
 
 print(a ^ b)     # a 和 b 中不同时存在的元素
 ```
+
+集合推导式
+
+```py
+# 集合推导式
+a = { x for x in 'abcdefg' if x not in 'abcefg'}
+print(a)
+```
+
+
 
 
 
@@ -259,13 +273,35 @@ print (dict[2])           # 输出键为 2 的值
 print (tinydict)          # 输出完整的字典
 print (tinydict.keys())   # 输出所有键
 print (tinydict.values()) # 输出所有值
+
+# 删除字典
+del dict1["sex"]
+print(dict1)
+
+```
+
+## Type
+
+```py
+a, b, c, d = 20, 5.5, True, 4+3j
+print(type(a), type(b), type(c), type(d))
+
+<class 'int'> <class 'float'> <class 'bool'> <class 'complex'>
+
+print(isinstance(a, int))
+True
+
 ```
 
 
 
 ## 运算符
 
-https://www.runoob.com/python3/python3-basic-operators.html
+
+
+## 条件控制
+
+
 
 
 
