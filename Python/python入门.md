@@ -301,11 +301,73 @@ True
 
 ## 条件控制
 
+![img](assets/if-condition.jpg)
+
+```py
+if condition_1:
+    statement_block_1
+elif condition_2: # 区别于else if  py中使用elif
+    statement_block_2
+else:
+    statement_block_3
+```
 
 
 
+## 循环语句
+
+![img](assets/loop.png)
+
+while 循环
+
+```py
+# 循环语句
+a =1
+num =5
+while a <= num :
+    print(a)
+    a=a+1
+
+print('done')
 
 
+```
+
+for循环
+
+```py
+list1 = ['hening', 'duhan', 'lin']
+for item in list1:
+    print(item)
+
+# range 遍历
+for i in range(len(list1)):
+    print(i, list1[i])
+
+```
+
+## 列表、集合、元组、字典的区别
+
+列表：使用中括号`[]`表示
+
+集合：set，使用大括号`{}`表示，但是不能用`{}`创建空集合，创建一个空集合必须用 **set()** 而不是 **{ }**，因为 **{ }** 是用来创建一个空字典
+
+元组：tuple，使用小括号`（）`表示
+
+字典：dict，使用`{}`表示
+
+
+
+## 推导式
+
+Python 推导式是一种独特的数据处理方式，可以从一个数据序列构建另一个新的数据序列的结构体。
+
+Python 支持各种数据结构的推导式：
+
+- 列表(list)推导式
+- 字典(dict)推导式
+- 集合(set)推导式
+- 元组(tuple)推导式
 
 
 
