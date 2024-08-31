@@ -482,3 +482,24 @@ def 函数名（参数列表）:
 
 
 
+### 自定义函数
+
+```py
+# py 函数
+def myfunc(a, b):
+    return a+b
+
+print(myfunc(10, 10))
+```
+
+### 匿名函数
+
+```py
+# 匿名函数
+a = lambda a :a +5
+print(a(10))
+
+b = lambda a,b ,c : a+b+c
+print(b(1,2,3))
+```
+
