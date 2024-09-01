@@ -20,3 +20,52 @@ npx create-next-app@latest nextjs-dashboard --example "https://github.com/vercel
 
 ![image-20240901003924978](assets/image-20240901003924978.png)
 
+
+
+# 创建布局和页面
+
+简单理解：
+
+layout.tsx:固定的文件名，用于创建布局，与该文件一个目录下的路由文件夹都会自动归属到该布局下
+
+page.tsx:固定的文件名，next只会渲染page页面
+
+
+
+在app目录下的文件夹名称 默认就是路由的名称，可以在文件夹内在创建page.tsx 就是一个新的页面(使用文件夹创建新的路由段)
+
+
+
+![image-20240901215845464](assets/image-20240901215845464.png)
+
+![image-20240901215924700](assets/image-20240901215924700.png)
+
+添加布局，用于多个页面之间的UI共享
+
+![image-20240901220949499](assets/image-20240901220949499.png)
+
+![image-20240901221008169](assets/image-20240901221008169.png)
+
+
+
+##  在页面之间导航
+
+正常情况下使用导航 会使用<a>标签 ，但是会用a标签会发现整个页面都会进行刷新
+
+在Next中提供了next/Link 标签进行页面间的导航
+
+
+
+![image-20240901222532119](assets/image-20240901222532119.png)
+
+通过**clsx** 动态添加css类型
+
+```js
+className={clsx(
+    'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
+    {
+        'bg-sky-100 text-blue-600': pathname === link.href,
+    },
+)}
+```
+
