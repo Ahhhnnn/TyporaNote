@@ -69,3 +69,46 @@ className={clsx(
 )}
 ```
 
+
+
+# 流媒体传输
+
+**第一种：**
+
+直接在需要流传输的页面同级别目录下创建一个loading.tsx
+
+```js
+import DashboardSkeleton from '@/app/ui/skeletons'
+
+export default function Loading() {
+    return <DashboardSkeleton />;
+}
+```
+
+该页面会先行直接返回到浏览器，知道需要显示的页面加载完毕。
+
+（loading.tsx是一个基于 Suspense 构建的特殊 Next.js 文件，它允许您创建后备 UI 以在页面内容加载时显示为替换。）
+
+可以在哎loading.tsx 中添加不同的组件用来渲染加载骨架
+
+
+
+
+
+**第二种：**
+使用<Suspense>组件
+
+```js
+import { Suspense } from 'react';
+```
+
+组件用法：
+
+然后，从 React 导入`<Suspense>` ，并将其包装在`<RevenueChart />`周围。您可以向其传递一个名为`<RevenueChartSkeleton>`的后备组件。
+
+```js
+<Suspense fallback={<RevenueChartSkeleton/>}>
+   <RevenueChart/>
+</Suspense>
+```
+
