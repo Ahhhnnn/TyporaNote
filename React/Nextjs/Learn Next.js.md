@@ -259,5 +259,348 @@ const handleSearch = useDebouncedCallback((term) => {
 
 查看分页组件： [pagination.tsx](../../../../code/react/nextjs-dashboard/app/ui/invoices/pagination.tsx) 
 
+在Page 页面默认可以接收到URL传参
 
+**注意：格式必须正确才能接收到参数**
+
+```js
+export default async function Page(
+    {searchParams}: {
+        searchParams?: {
+            query?: string;
+            page?: string;
+        }
+    }
+)
+```
+
+以后的分页组件可以参考该例子，有比较全面的分页组件设计
+
+```tsx
+'use client';
+
+import {ArrowLeftIcon, ArrowRightIcon} from '@heroicons/react/24/outline';
+import clsx from 'clsx';
+import Link from 'next/link';
+import {generatePagination} from '@/app/lib/utils';
+import {usePathname, useSearchParams} from "next/navigation";
+
+export default function Pagination({totalPages}: { totalPages: number }) {
+    // NOTE: Uncomment this code in Chapter 11
+
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const currentPage = Number(searchParams.get("page")) || 1;
+    const createPageURL = (page: number | string) => {
+        const params = new URLSearchParams(searchParams);
+        params.set("page", page.toString());
+        return `${pathname}?${params.toString()}`;
+    };
+
+    const allPages = generatePagination(currentPage, totalPages);
+
+    return (
+        <>
+            {/*  NOTE: Uncomment this code in Chapter 11 */}
+
+            <div className="inline-flex">
+                <PaginationArrow
+                    direction="left"
+                    href={createPageURL(currentPage - 1)}
+                    isDisabled={currentPage <= 1}
+                />
+
+                <div className="flex -space-x-px">
+                    {allPages.map((page, index) => {
+                        let position: 'first' | 'last' | 'single' | 'middle' | undefined;
+
+                        if (index === 0) position = 'first';
+                        if (index === allPages.length - 1) position = 'last';
+                        if (allPages.length === 1) position = 'single';
+                        if (page === '...') position = 'middle';
+
+                        return (
+                            <PaginationNumber
+                                key={page}
+                                href={createPageURL(page)}
+                                page={page}
+                                position={position}
+                                isActive={currentPage === page}
+                            />
+                        );
+                    })}
+                </div>
+
+                <PaginationArrow
+                    direction="right"
+                    href={createPageURL(currentPage + 1)}
+                    isDisabled={currentPage >= totalPages}
+                />
+            </div>
+        </>
+    );
+}
+
+function PaginationNumber({
+                              page,
+                              href,
+                              isActive,
+                              position,
+                          }: {
+    page: number | string;
+    href: string;
+    position?: 'first' | 'last' | 'middle' | 'single';
+    isActive: boolean;
+}) {
+    const className = clsx(
+        'flex h-10 w-10 items-center justify-center text-sm border',
+        {
+            'rounded-l-md': position === 'first' || position === 'single',
+            'rounded-r-md': position === 'last' || position === 'single',
+            'z-10 bg-blue-600 border-blue-600 text-white': isActive,
+            'hover:bg-gray-100': !isActive && position !== 'middle',
+            'text-gray-300': position === 'middle',
+        },
+    );
+
+    return isActive || position === 'middle' ? (
+        <div className={className}>{page}</div>
+    ) : (
+        <Link href={href} className={className}>
+            {page}
+        </Link>
+    );
+}
+
+function PaginationArrow({
+                             href,
+                             direction,
+                             isDisabled,
+                         }: {
+    href: string;
+    direction: 'left' | 'right';
+    isDisabled?: boolean;
+}) {
+    const className = clsx(
+        'flex h-10 w-10 items-center justify-center rounded-md border',
+        {
+            'pointer-events-none text-gray-300': isDisabled,
+            'hover:bg-gray-100': !isDisabled,
+            'mr-2 md:mr-4': direction === 'left',
+            'ml-2 md:ml-4': direction === 'right',
+        },
+    );
+
+    const icon =
+        direction === 'left' ? (
+            <ArrowLeftIcon className="w-4"/>
+        ) : (
+            <ArrowRightIcon className="w-4"/>
+        );
+
+    return isDisabled ? (
+        <div className={className}>{icon}</div>
+    ) : (
+        <Link className={className} href={href}>
+            {icon}
+        </Link>
+    );
+}
+
+```
+
+
+
+# 操作数据
+
+## 服务器操作
+
+React Server Actions 允许您直接在服务器上运行异步代码。它们消除了创建 API 端点来改变数据的需要。相反，您可以编写在服务器上执行的异步函数，并且可以从客户端或服务器组件调用。
+
+## 表单与服务器操作结合
+
+在 React 中，您可以使用`<form>`元素中的`action`属性来调用操作。该操作将自动接收本机[FormData](https://developer.mozilla.org/en-US/docs/Web/API/FormData)对象，包含捕获的数据。
+
+```js
+// Server Component
+export default function Page() {
+  // Action 自动接受参数
+  async function create(formData: FormData) {
+    'use server';
+ 
+    // Logic to mutate data...
+  }
+ 
+  // Invoke the action using the "action" attribute
+  // 自动接受参数，不用手动传参
+  return <form action={create}>...</form>;
+}
+```
+
+
+
+## 服务器运行声明
+
+```js
+'use server';
+```
+
+通过添加`'use server'` ，您可以将文件中的所有导出函数标记为服务器操作。然后可以在客户端和服务器组件中导入和使用这些服务器功能。
+
+您还可以通过在操作中添加`"use server"`来直接在服务器组件中编写服务器操作。但对于本课程，我们会将它们全部组织在一个单独的文件中。
+
+
+
+由于action属性会自动传递FormData数据到指定的方法中，因此直接在方法中直接获取属性即可
+
+```js
+'use server';
+ 
+export async function createInvoice(formData: FormData) {
+  const rawFormData = {
+    customerId: formData.get('customerId'),
+    amount: formData.get('amount'),
+    status: formData.get('status'),
+  };
+  // Test it out:
+  console.log(rawFormData);
+}
+```
+
+
+
+## 参数类型验证
+
+引用第三方库进行验证
+
+```js
+import { z } from 'zod';
+```
+
+```js
+'use server';
+ 
+import { z } from 'zod';
+ 
+// 表单约束
+const FormSchema = z.object({
+  id: z.string(),
+  customerId: z.string(),
+  amount: z.coerce.number(),
+  status: z.enum(['pending', 'paid']),
+  date: z.string(),
+});
+ 
+const CreateInvoice = FormSchema.omit({ id: true, date: true });
+ 
+export async function createInvoice(formData: FormData) {
+  const {customerId, amount, status } = CreateInvoice.parse({
+        customerId: formData.get('customerId'),
+        amount: formData.get('amount'),
+        status: formData.get('status'),
+    });
+}
+```
+
+
+
+创建新日期，获取格式为YYYY-DD-MM的日期字符串
+
+```js
+  const date = new Date().toISOString().split('T')[0];
+```
+
+##  重新验证和重定向
+
+Next.js 有一个客户端路由器缓存，可将路由段存储在用户浏览器中一段时间。与预取一起，此缓存可确保用户可以在路由之间快速导航，同时减少向服务器发出的请求数量。
+
+因此如果存在在某个页面更新数据的情况，需要清除缓存，您可以使用 Next.js 中的[`revalidatePath`](https://nextjs.org/docs/app/api-reference/functions/revalidatePath)函数来执行此操作：
+
+```js
+// 清除缓存，重新验证
+revalidatePath('/dashboard/invoices');
+```
+
+重定向到指定的路径
+
+```js
+redirect('/dashboard/invoices');
+```
+
+
+
+# 更新数据
+
+当您不知道确切的路段名称并希望根据数据创建路线时，Next.js 允许您创建[动态路线段](https://nextjs.org/docs/app/building-your-application/routing/dynamic-routes)。这可以是博客文章标题、产品页面等。您可以通过将文件夹名称括在方括号中来创建动态路由段。例如， `[id]` 、 `[post]`或`[slug]` 
+
+![image-20240904231637548](assets/image-20240904231637548.png)
+
+## 动态路由路径
+
+在href中接受id属性。您可以使用模板文字链接到动态路线段：
+
+```js
+import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+ 
+// ...
+ 
+export function UpdateInvoice({ id }: { id: string }) {
+  return (
+    <Link
+    
+      href={`/dashboard/invoices/${id}/edit`}
+      className="rounded-md border p-2 hover:bg-gray-100"
+    >
+      <PencilIcon className="w-5" />
+    </Link>
+  );
+}
+```
+
+
+
+## 页面Param参数
+
+除了searchParams之外，页面组件还接受一个名为**params**属性，您可以使用它来访问id 。更新您的<Page>组件以接收该属性：
+
+见上文，**params** 属性可以接受路径中的参数
+
+
+
+
+
+## bind 传递参数
+
+在Aciton 属性中使用 JS bind将id传递给服务器操作。这将确保传递给服务器操作的任何值都经过编码。
+
+```js
+// ...
+import { updateInvoice } from '@/app/lib/actions';
+ 
+export default function EditInvoiceForm({
+  invoice,
+  customers,
+}: {
+  invoice: InvoiceForm;
+  customers: CustomerField[];
+}) {
+  //bind 方法的第一个参数是 null，这意味着新创建的函数 updateInvoiceWithId 在调用时，其内部的 this 关键字将会是 null。在这种情况下，this 的值通常用于指定函数内部需要的上下文，但由于这里传递了 null，所以 updateInvoice 函数内部不会引用任何对象的实例。
+
+// invoice.id 是一个参数，它被预先绑定到新函数 updateInvoiceWithId 上。这意味着无论何时调用 updateInvoiceWithId，它都会自动将 invoice.id 作为第一个参数传递给
+  const updateInvoiceWithId = updateInvoice.bind(null, invoice.id);
+ 
+  return (
+    <form action={updateInvoiceWithId}>
+      <input type="hidden" name="id" value={invoice.id} />
+    </form>
+  );
+}
+```
+
+**注意：**在表单中使用隐藏的输入字段也可以（例如 `<input type="hidden" name="id" value={invoice.id} />` ）。但是，这些值将在 HTML 源中显示为全文，这对于 ID 等敏感数据来说并不理想。
+
+
+
+## 异常处理
 
