@@ -167,5 +167,456 @@ export default function Gallery() {
 
 这个空标签被称作 *[Fragment](https://zh-hans.react.dev/reference/react/Fragment)*。React Fragment 允许你将子元素分组，而不会在 HTML 结构中添加额外节点。
 
+### 为什么多个 JSX 标签需要被一个父元素包裹？ 
 
+JSX 虽然看起来很像 HTML，但在底层其实被转化为了 JavaScript 对象，**你不能在一个函数中返回多个对象**，除非用一个数组把他们包装起来。这就是为什么多个 JSX 标签必须要用一个父元素或者 Fragment 来包裹。
+
+
+
+### 标签必须闭合 
+
+JSX 要求标签必须正确闭合。像 `<img>` 这样的自闭合标签必须书写成 `<img />`，而像 `<li>oranges` 这样只有开始标签的元素必须带有闭合标签，需要改为 `<li>oranges</li>`。
+
+```jsx
+<>
+  <img 
+    src="https://i.imgur.com/yXOvdOSs.jpg" 
+    alt="Hedy Lamarr" 
+    class="photo"
+   />
+  <ul>
+      <li>发明一种新式交通信号灯</li>
+      <li>排练一个电影场景</li>
+      <li>改进频谱技术</li>
+  </ul>
+</>
+```
+
+### 3. 使用驼峰式命名法给 所有 大部分属性命名！ 
+
+JSX 最终会被转化为 JavaScript，而 JSX 中的属性也会变成 JavaScript 对象中的键值对。在你自己的组件中，经常会遇到需要用变量的方式读取这些属性的时候。但 JavaScript 对变量的命名有限制。例如，变量名称不能包含 `-` 符号或者像 `class` 这样的保留字。
+
+这就是为什么在 React 中，大部分 HTML 和 SVG 属性都用驼峰式命名法表示。例如，需要用 `strokeWidth` 代替 `stroke-width`。由于 `class` 是一个保留字，所以在 React 中需要用 `className` 来代替。这也是 [DOM 属性中的命名](https://developer.mozilla.org/zh-CN/docs/Web/API/Element/className):
+
+```jsx
+<img 
+  src="https://i.imgur.com/yXOvdOSs.jpg" 
+  alt="Hedy Lamarr" 
+  className="photo"
+/>
+```
+
+
+
+## 在 JSX 中通过大括号使用 JavaScript
+
+参考：https://zh-hans.react.dev/learn/javascript-in-jsx-with-curly-braces
+
+JSX 允许你在 JavaScript 中编写类似 HTML 的标签，从而使渲染的逻辑和内容可以写在一起。有时候，你可能想要在标签中添加一些 JavaScript 逻辑或者引用动态的属性。这种情况下，你可以在 JSX 的大括号内来编写 JavaScript。
+
+### 使用引号传递字符串 
+
+当你想把一个字符串属性传递给 JSX 时，把它放到单引号或双引号中：
+
+```jsx
+export default function Avatar() {
+  return (
+    <img
+      className="avatar"
+      src="https://i.imgur.com/7vQD0fPs.jpg"
+      alt="Gregorio Y. Zara"
+    />
+  );
+}
+
+```
+
+但是如果你想要动态地指定 `src` 或 `alt` 的值呢？你可以 **用 `{` 和 `}` 替代 `"` 和 `"` 以使用 JavaScript 变量** ：
+
+```jsx
+export default function Avatar() {
+  const avatar = 'https://i.imgur.com/7vQD0fPs.jpg';
+  const description = 'Gregorio Y. Zara';
+  return (
+    <img
+      className="avatar"
+      src={avatar}
+      alt={description}
+    />
+  );
+}
+
+```
+
+### 可以在哪使用大括号 
+
+在 JSX 中，只能在以下两种场景中使用大括号：
+
+1. 用作 JSX 标签内的**文本**：`<h1>{name}'s To Do List</h1>` 是有效的，但是 `<{tag}>Gregorio Y. Zara's To Do List</{tag}>` 无效。
+2. 用作紧跟在 `=` 符号后的 **属性**：`src={avatar}` 会读取 `avatar` 变量，但是 `src="{avatar}"` 只会传一个字符串 `{avatar}`。
+
+
+
+### 使用 “双大括号”：JSX 中的 CSS 和 对象 
+
+除了字符串、数字和其它 JavaScript 表达式，你甚至可以在 JSX 中传递对象。对象也用大括号表示，例如 `{ name: "Hedy Lamarr", inventions: 5 }`。因此，为了能在 JSX 中传递，你必须用另一对额外的大括号包裹对象：`person={{ name: "Hedy Lamarr", inventions: 5 }}`。
+
+你可能在 JSX 的内联 CSS 样式中就已经见过这种写法了。React 不要求你使用内联样式（使用 CSS 类就能满足大部分情况）。但是当你需要内联样式的时候，你可以给 `style` 属性传递一个对象：
+
+CSS 内联 CSS 样式 就是一个对象，因此需要使用双大括号
+
+```jsx
+export default function TodoList() {
+  return (
+    <ul style={{
+      backgroundColor: 'black',
+      color: 'pink'
+    }}>
+      <li>Improve the videophone</li>
+      <li>Prepare aeronautics lectures</li>
+      <li>Work on the alcohol-fuelled engine</li>
+    </ul>
+  );
+}
+
+```
+
+**所以当你下次在 JSX 中看到 `{{` 和 `}}`时，就知道它只不过是包在大括号里的一个对象罢了！**
+
+内联 `style` 属性 使用驼峰命名法编写。例如，HTML `<ul style="background-color: black">` 在你的组件里应该写成 `<ul style={{ backgroundColor: 'black' }}>`。
+
+
+
+### JavaScript 对象和大括号的更多可能 
+
+你可以将多个表达式合并到一个对象中，在 JSX 的大括号内分别使用它们：
+
+将style 属性设置为一个对象
+
+```json
+{
+  name: 'Gregorio Y. Zara',
+  theme: {
+    backgroundColor: 'black',
+    color: 'pink'
+  }
+}
+```
+
+
+
+```jsx
+const person = {
+  name: 'Gregorio Y. Zara',
+  theme: {
+    backgroundColor: 'black',
+    color: 'pink'
+  }
+};
+
+export default function TodoList() {
+  return (
+    <div style={person.theme}>
+      <h1>{person.name}'s Todos</h1>
+      <img
+        className="avatar"
+        src="https://i.imgur.com/7vQD0fPs.jpg"
+        alt="Gregorio Y. Zara"
+      />
+      <ul>
+        <li>Improve the videophone</li>
+        <li>Prepare aeronautics lectures</li>
+        <li>Work on the alcohol-fuelled engine</li>
+      </ul>
+    </div>
+  );
+}
+
+```
+
+## 将 Props 传递给组件
+
+**参考**:https://zh-hans.react.dev/learn/passing-props-to-a-component
+
+**重点：重点学习**
+
+React 组件使用 *props* 来互相通信。每个父组件都可以提供 props 给它的子组件，从而将一些信息传递给它。Props 可能会让你想起 HTML 属性，但你可以通过它们传递任何 JavaScript 值，包括对象、数组和函数。
+
+
+
+
+
+# 条件渲染
+
+通常你的组件会需要根据不同的情况显示不同的内容。在 React 中，你可以通过使用 JavaScript 的 `if` 语句、`&&` 和 `? :` 运算符来选择性地渲染 JSX。
+
+##  If 渲染
+
+```jsx
+function Item({ name, isPacked }) {
+  if (isPacked) {
+    return <li className="item">{name} ✅</li>;
+  }
+  return <li className="item">{name}</li>;
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride 的行李清单</h1>
+      <ul>
+        <Item 
+          isPacked={true} 
+          name="宇航服" 
+        />
+        <Item 
+          isPacked={true} 
+          name="带金箔的头盔" 
+        />
+        <Item 
+          isPacked={false} 
+          name="Tam 的照片" 
+        />
+      </ul>
+    </section>
+  );
+}
+
+```
+
+问题是可能会比较荣誉
+
+```jsx
+```
+
+## 三目运算符（`? :`）
+
+```jsx
+function Item({ name, isPacked }) {
+  return (
+    <li className="item">
+      {isPacked ? (
+        <del>
+          {name + ' ✅'}
+        </del>
+      ) : (
+        name
+      )}
+    </li>
+  );
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride 的行李清单</h1>
+      <ul>
+        <Item 
+          isPacked={true} 
+          name="宇航服" 
+        />
+        <Item 
+          isPacked={true} 
+          name="带金箔的头盔" 
+        />
+        <Item 
+          isPacked={false} 
+          name="Tam 的照片" 
+        />
+      </ul>
+    </section>
+  );
+}
+
+```
+
+
+
+## 与运算符（`&&`）
+
+&& 当左侧条件成立时，则渲染右边
+
+```jsx
+function Item({ name, isPacked }) {
+  return (
+    <li className="item">
+      {name} {isPacked && '✅'}
+    </li>
+  );
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride 的行李清单</h1>
+      <ul>
+        <Item 
+          isPacked={true} 
+          name="宇航服" 
+        />
+        <Item 
+          isPacked={true} 
+          name="带金箔的头盔" 
+        />
+        <Item 
+          isPacked={false} 
+          name="Tam 的照片" 
+        />
+      </ul>
+    </section>
+  );
+}
+```
+
+## 常量赋值
+
+冗长，但是比较灵活
+
+```jsx
+function Item({ name, isPacked }) {
+  let itemContent = name;
+  if (isPacked) {
+    itemContent = name + " ✅";
+  }
+  return (
+    <li className="item">
+      {itemContent}
+    </li>
+  );
+}
+
+export default function PackingList() {
+  return (
+    <section>
+      <h1>Sally Ride 的行李清单</h1>
+      <ul>
+        <Item 
+          isPacked={true} 
+          name="宇航服" 
+        />
+        <Item 
+          isPacked={true} 
+          name="带金箔的头盔" 
+        />
+        <Item 
+          isPacked={false} 
+          name="Tam 的照片" 
+        />
+      </ul>
+    </section>
+  );
+}
+```
+
+
+
+# 渲染列表
+
+你可能经常需要通过 [JavaScript 的数组方法](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array#) 来操作数组中的数据，从而将一个数据集渲染成多个相似的组件。
+
+## map 渲染
+
+```jsx
+const people = [
+  '凯瑟琳·约翰逊: 数学家',
+  '马里奥·莫利纳: 化学家',
+  '穆罕默德·阿卜杜勒·萨拉姆: 物理学家',
+  '珀西·莱温·朱利亚: 化学家',
+  '苏布拉马尼扬·钱德拉塞卡: 天体物理学家',
+];
+
+export default function List() {
+  const listItems = people.map(person =>
+    <li>{person}</li>
+  );
+  return <ul>{listItems}</ul>;
+}
+
+```
+
+
+
+## filter 过滤并渲染
+
+```jsx
+
+
+interface Person {
+  id: number;
+  name: string;
+  profession: string;
+  accomplishment: string;
+  imageId: string;
+};
+
+const people: Person[] = [
+    {
+      id: 0,
+      name: '凯瑟琳·约翰逊',
+      profession: '数学家',
+      accomplishment: '太空飞行相关数值的核算',
+      imageId: 'MK3eW3A',
+    },
+    {
+      id: 1,
+      name: '马里奥·莫利纳',
+      profession: '化学家',
+      accomplishment: '北极臭氧空洞的发现',
+      imageId: 'mynHUSa',
+    },
+    {
+      id: 2,
+      name: '穆罕默德·阿卜杜勒·萨拉姆',
+      profession: '物理学家',
+      accomplishment: '关于基本粒子间弱相互作用和电磁相互作用的统一理论',
+      imageId: 'bE7W1ji',
+    },
+    {
+      id: 3,
+      name: '珀西·莱温·朱利亚',
+      profession: '化学家',
+      accomplishment: '开创性的可的松药物、类固醇和避孕药的研究',
+      imageId: 'IOjWm71',
+    },
+    {
+      id: 4,
+      name: '苏布拉马尼扬·钱德拉塞卡',
+      profession: '天体物理学家',
+      accomplishment: '白矮星质量计算',
+      imageId: 'lrWQx8l',
+    },
+  ];
+  
+function App() {
+    const chemists = people.filter(person =>
+        person.profession === '化学家'
+      );
+      const listItems = chemists.map(person =>
+        <li>
+          <img
+            src={getImageUrl(person)}
+            alt={person.name}
+          />
+          <p>
+            <b>{person.name}:</b>
+            {' ' + person.profession + ' '}
+            因{person.accomplishment}而闻名世界
+          </p>
+        </li>
+      );
+      return <ul>{listItems}</ul>;
+  }
+  
+export function getImageUrl(person: Person) {
+return (
+    'https://i.imgur.com/' +
+    person.imageId +
+    's.jpg'
+);
+}
+  
+export default App;
+```
+
+# 保持组件纯粹
 
